@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.env
+Har files/
+*.har
+medlibro_website_scraper/mirror_users.json
+medlibro_website_scraper/mirror_sessions.json
+
+# Scraped HTML cache — not used by serve_mirror / Docker (only mirror/ is served)
+medlibro_website_scraper/scraped_website/
+
+# Large / duplicate data — not needed for Docker deploy (Data/ is canonical)
+*.zip
+First year/
+medlibro_QCMs_api_*.json
+medlibro_api_test_responses.json
+Data/*.backup
+Data/**/*.backup

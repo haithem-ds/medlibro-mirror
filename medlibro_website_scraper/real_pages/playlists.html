@@ -1,0 +1,1205 @@
+<html lang="fr"><head>
+		<meta charset="utf-8">
+		<meta content="IE=edge" http-equiv="X-UA-Compatible">
+		<meta content="width=device-width,initial-scale=1.0" name="viewport">
+
+		
+		
+		<style type="text/css">@font-face {font-family:Noto Sans;font-style:normal;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/devanagari/wght/normal.woff2);unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20A8,U+20B9,U+25CC,U+A830-A839,U+A8E0-A8FF;font-display:swap;}@font-face {font-family:Noto Sans;font-style:normal;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/greek/wght/normal.woff2);unicode-range:U+0370-03FF;font-display:swap;}@font-face {font-family:Noto Sans;font-style:normal;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C88,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:Noto Sans;font-style:normal;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:Noto Sans;font-style:normal;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:Noto Sans;font-style:normal;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/greek-ext/wght/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:Noto Sans;font-style:normal;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/latin-ext/wght/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:Noto Sans;font-style:normal;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:Noto Sans;font-style:italic;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/vietnamese/wght/italic.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:Noto Sans;font-style:italic;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/cyrillic-ext/wght/italic.woff2);unicode-range:U+0460-052F,U+1C80-1C88,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:Noto Sans;font-style:italic;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/devanagari/wght/italic.woff2);unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20A8,U+20B9,U+25CC,U+A830-A839,U+A8E0-A8FF;font-display:swap;}@font-face {font-family:Noto Sans;font-style:italic;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/latin-ext/wght/italic.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:Noto Sans;font-style:italic;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/greek/wght/italic.woff2);unicode-range:U+0370-03FF;font-display:swap;}@font-face {font-family:Noto Sans;font-style:italic;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/greek-ext/wght/italic.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:Noto Sans;font-style:italic;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/latin/wght/italic.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:Noto Sans;font-style:italic;font-weight:100 900;src:url(/cf-fonts/v/noto-sans/5.0.18/cyrillic/wght/italic.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}</style>
+
+		<link rel="preconnect" href="https://cdn.jsdelivr.net">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+
+		<link href="/favicon.ico" rel="icon">
+		<title>Playlists / OPSO MedLibro</title>
+		<script type="module" crossorigin="" src="/assets/index-AtrV5JHa.js"></script>
+		<link rel="modulepreload" crossorigin="" href="/assets/vendor-Cv0_FV-r.js">
+		<link rel="modulepreload" crossorigin="" href="/assets/vuetify-B_-uhRm4.js">
+		<link rel="stylesheet" crossorigin="" href="/assets/index-C17dsj-d.css">
+	<style type="text/css" id="vuetify-theme-stylesheet">:root {
+  --v-anchor-base: #20a0d8;
+  --v-primary-base: #20a0d8;
+  --v-primary-lighten5: #ccffff;
+  --v-primary-lighten4: #aeffff;
+  --v-primary-lighten3: #8ff3ff;
+  --v-primary-lighten2: #6fd7ff;
+  --v-primary-lighten1: #4dbbf5;
+  --v-primary-darken1: #0086bc;
+  --v-primary-darken2: #006da1;
+  --v-primary-darken3: #005486;
+  --v-primary-darken4: #003d6d;
+  --v-secondary-base: #71797e;
+  --v-secondary-lighten5: #f8ffff;
+  --v-secondary-lighten4: #dce5ea;
+  --v-secondary-lighten3: #c0c9ce;
+  --v-secondary-lighten2: #a5adb3;
+  --v-secondary-lighten1: #8a9398;
+  --v-secondary-darken1: #586065;
+  --v-secondary-darken2: #41494d;
+  --v-secondary-darken3: #2b3236;
+  --v-secondary-darken4: #161d21;
+  --v-accent-base: #9871ec;
+  --v-accent-lighten5: #fffaff;
+  --v-accent-lighten4: #ffddff;
+  --v-accent-lighten3: #efc1ff;
+  --v-accent-lighten2: #d2a6ff;
+  --v-accent-lighten1: #b58bff;
+  --v-accent-darken1: #7c58cf;
+  --v-accent-darken2: #603fb3;
+  --v-accent-darken3: #432898;
+  --v-accent-darken4: #23107d;
+  --v-error-base: #ed1c24;
+  --v-error-lighten5: #ffbea1;
+  --v-error-lighten4: #ffa186;
+  --v-error-lighten3: #ff836c;
+  --v-error-lighten2: #ff6553;
+  --v-error-lighten1: #ff453b;
+  --v-error-darken1: #cc000d;
+  --v-error-darken2: #ab0000;
+  --v-error-darken3: #8c0000;
+  --v-error-darken4: #6e0000;
+  --v-info-base: #2196f3;
+  --v-info-lighten5: #d4ffff;
+  --v-info-lighten4: #b5ffff;
+  --v-info-lighten3: #95e8ff;
+  --v-info-lighten2: #75ccff;
+  --v-info-lighten1: #51b0ff;
+  --v-info-darken1: #007cd6;
+  --v-info-darken2: #0064ba;
+  --v-info-darken3: #004d9f;
+  --v-info-darken4: #003784;
+  --v-success-base: #5fad56;
+  --v-success-lighten5: #ecffdc;
+  --v-success-lighten4: #cfffc0;
+  --v-success-lighten3: #b2ffa4;
+  --v-success-lighten2: #96e589;
+  --v-success-lighten1: #7ac96f;
+  --v-success-darken1: #44923d;
+  --v-success-darken2: #277825;
+  --v-success-darken3: #005e0a;
+  --v-success-darken4: #004600;
+  --v-warning-base: #fb8c00;
+  --v-warning-lighten5: #ffff9e;
+  --v-warning-lighten4: #fffb82;
+  --v-warning-lighten3: #ffdf67;
+  --v-warning-lighten2: #ffc24b;
+  --v-warning-lighten1: #ffa72d;
+  --v-warning-darken1: #db7200;
+  --v-warning-darken2: #bb5900;
+  --v-warning-darken3: #9d4000;
+  --v-warning-darken4: #802700;
+  --v-opso-base: #ef4035;
+  --v-opso-lighten5: #ffd3b4;
+  --v-opso-lighten4: #ffb599;
+  --v-opso-lighten3: #ff987f;
+  --v-opso-lighten2: #ff7b65;
+  --v-opso-lighten1: #ff5e4d;
+  --v-opso-darken1: #cf1b1e;
+  --v-opso-darken2: #ae0007;
+  --v-opso-darken3: #8f0000;
+  --v-opso-darken4: #710000;
+  --v-medlibro-base: #20a0d8;
+  --v-medlibro-lighten5: #ccffff;
+  --v-medlibro-lighten4: #aeffff;
+  --v-medlibro-lighten3: #8ff3ff;
+  --v-medlibro-lighten2: #6fd7ff;
+  --v-medlibro-lighten1: #4dbbf5;
+  --v-medlibro-darken1: #0086bc;
+  --v-medlibro-darken2: #006da1;
+  --v-medlibro-darken3: #005486;
+  --v-medlibro-darken4: #003d6d;
+  --v-border-base: #f5f5f5;
+  --v-border-lighten5: #ffffff;
+  --v-border-lighten4: #ffffff;
+  --v-border-lighten3: #ffffff;
+  --v-border-lighten2: #ffffff;
+  --v-border-lighten1: #ffffff;
+  --v-border-darken1: #d9d9d9;
+  --v-border-darken2: #bdbdbd;
+  --v-border-darken3: #a2a2a2;
+  --v-border-darken4: #888888;
+  --v-background-base: #ffffff;
+  --v-background-lighten5: #ffffff;
+  --v-background-lighten4: #ffffff;
+  --v-background-lighten3: #ffffff;
+  --v-background-lighten2: #ffffff;
+  --v-background-lighten1: #ffffff;
+  --v-background-darken1: #e2e2e2;
+  --v-background-darken2: #c6c6c6;
+  --v-background-darken3: #ababab;
+  --v-background-darken4: #919191;
+  --v-binary-base: #000000;
+  --v-binary-lighten5: #777777;
+  --v-binary-lighten4: #5e5e5e;
+  --v-binary-lighten3: #474747;
+  --v-binary-lighten2: #303030;
+  --v-binary-lighten1: #1b1b1b;
+  --v-binary-darken1: #000000;
+  --v-binary-darken2: #000000;
+  --v-binary-darken3: #000000;
+  --v-binary-darken4: #000000;
+  --v-binary-reverse-base: #ffffff;
+  --v-binary-reverse-lighten5: #ffffff;
+  --v-binary-reverse-lighten4: #ffffff;
+  --v-binary-reverse-lighten3: #ffffff;
+  --v-binary-reverse-lighten2: #ffffff;
+  --v-binary-reverse-lighten1: #ffffff;
+  --v-binary-reverse-darken1: #e2e2e2;
+  --v-binary-reverse-darken2: #c6c6c6;
+  --v-binary-reverse-darken3: #ababab;
+  --v-binary-reverse-darken4: #919191;
+}
+
+.v-application a { color: var(--v-anchor-base); }
+.v-application .primary {
+  background-color: var(--v-primary-base) !important;
+  border-color: var(--v-primary-base) !important;
+}
+.v-application .primary--text {
+  color: var(--v-primary-base) !important;
+  caret-color: var(--v-primary-base) !important;
+}
+.v-application .primary.lighten-5 {
+  background-color: var(--v-primary-lighten5) !important;
+  border-color: var(--v-primary-lighten5) !important;
+}
+.v-application .primary--text.text--lighten-5 {
+  color: var(--v-primary-lighten5) !important;
+  caret-color: var(--v-primary-lighten5) !important;
+}
+.v-application .primary.lighten-4 {
+  background-color: var(--v-primary-lighten4) !important;
+  border-color: var(--v-primary-lighten4) !important;
+}
+.v-application .primary--text.text--lighten-4 {
+  color: var(--v-primary-lighten4) !important;
+  caret-color: var(--v-primary-lighten4) !important;
+}
+.v-application .primary.lighten-3 {
+  background-color: var(--v-primary-lighten3) !important;
+  border-color: var(--v-primary-lighten3) !important;
+}
+.v-application .primary--text.text--lighten-3 {
+  color: var(--v-primary-lighten3) !important;
+  caret-color: var(--v-primary-lighten3) !important;
+}
+.v-application .primary.lighten-2 {
+  background-color: var(--v-primary-lighten2) !important;
+  border-color: var(--v-primary-lighten2) !important;
+}
+.v-application .primary--text.text--lighten-2 {
+  color: var(--v-primary-lighten2) !important;
+  caret-color: var(--v-primary-lighten2) !important;
+}
+.v-application .primary.lighten-1 {
+  background-color: var(--v-primary-lighten1) !important;
+  border-color: var(--v-primary-lighten1) !important;
+}
+.v-application .primary--text.text--lighten-1 {
+  color: var(--v-primary-lighten1) !important;
+  caret-color: var(--v-primary-lighten1) !important;
+}
+.v-application .primary.darken-1 {
+  background-color: var(--v-primary-darken1) !important;
+  border-color: var(--v-primary-darken1) !important;
+}
+.v-application .primary--text.text--darken-1 {
+  color: var(--v-primary-darken1) !important;
+  caret-color: var(--v-primary-darken1) !important;
+}
+.v-application .primary.darken-2 {
+  background-color: var(--v-primary-darken2) !important;
+  border-color: var(--v-primary-darken2) !important;
+}
+.v-application .primary--text.text--darken-2 {
+  color: var(--v-primary-darken2) !important;
+  caret-color: var(--v-primary-darken2) !important;
+}
+.v-application .primary.darken-3 {
+  background-color: var(--v-primary-darken3) !important;
+  border-color: var(--v-primary-darken3) !important;
+}
+.v-application .primary--text.text--darken-3 {
+  color: var(--v-primary-darken3) !important;
+  caret-color: var(--v-primary-darken3) !important;
+}
+.v-application .primary.darken-4 {
+  background-color: var(--v-primary-darken4) !important;
+  border-color: var(--v-primary-darken4) !important;
+}
+.v-application .primary--text.text--darken-4 {
+  color: var(--v-primary-darken4) !important;
+  caret-color: var(--v-primary-darken4) !important;
+}
+.v-application .secondary {
+  background-color: var(--v-secondary-base) !important;
+  border-color: var(--v-secondary-base) !important;
+}
+.v-application .secondary--text {
+  color: var(--v-secondary-base) !important;
+  caret-color: var(--v-secondary-base) !important;
+}
+.v-application .secondary.lighten-5 {
+  background-color: var(--v-secondary-lighten5) !important;
+  border-color: var(--v-secondary-lighten5) !important;
+}
+.v-application .secondary--text.text--lighten-5 {
+  color: var(--v-secondary-lighten5) !important;
+  caret-color: var(--v-secondary-lighten5) !important;
+}
+.v-application .secondary.lighten-4 {
+  background-color: var(--v-secondary-lighten4) !important;
+  border-color: var(--v-secondary-lighten4) !important;
+}
+.v-application .secondary--text.text--lighten-4 {
+  color: var(--v-secondary-lighten4) !important;
+  caret-color: var(--v-secondary-lighten4) !important;
+}
+.v-application .secondary.lighten-3 {
+  background-color: var(--v-secondary-lighten3) !important;
+  border-color: var(--v-secondary-lighten3) !important;
+}
+.v-application .secondary--text.text--lighten-3 {
+  color: var(--v-secondary-lighten3) !important;
+  caret-color: var(--v-secondary-lighten3) !important;
+}
+.v-application .secondary.lighten-2 {
+  background-color: var(--v-secondary-lighten2) !important;
+  border-color: var(--v-secondary-lighten2) !important;
+}
+.v-application .secondary--text.text--lighten-2 {
+  color: var(--v-secondary-lighten2) !important;
+  caret-color: var(--v-secondary-lighten2) !important;
+}
+.v-application .secondary.lighten-1 {
+  background-color: var(--v-secondary-lighten1) !important;
+  border-color: var(--v-secondary-lighten1) !important;
+}
+.v-application .secondary--text.text--lighten-1 {
+  color: var(--v-secondary-lighten1) !important;
+  caret-color: var(--v-secondary-lighten1) !important;
+}
+.v-application .secondary.darken-1 {
+  background-color: var(--v-secondary-darken1) !important;
+  border-color: var(--v-secondary-darken1) !important;
+}
+.v-application .secondary--text.text--darken-1 {
+  color: var(--v-secondary-darken1) !important;
+  caret-color: var(--v-secondary-darken1) !important;
+}
+.v-application .secondary.darken-2 {
+  background-color: var(--v-secondary-darken2) !important;
+  border-color: var(--v-secondary-darken2) !important;
+}
+.v-application .secondary--text.text--darken-2 {
+  color: var(--v-secondary-darken2) !important;
+  caret-color: var(--v-secondary-darken2) !important;
+}
+.v-application .secondary.darken-3 {
+  background-color: var(--v-secondary-darken3) !important;
+  border-color: var(--v-secondary-darken3) !important;
+}
+.v-application .secondary--text.text--darken-3 {
+  color: var(--v-secondary-darken3) !important;
+  caret-color: var(--v-secondary-darken3) !important;
+}
+.v-application .secondary.darken-4 {
+  background-color: var(--v-secondary-darken4) !important;
+  border-color: var(--v-secondary-darken4) !important;
+}
+.v-application .secondary--text.text--darken-4 {
+  color: var(--v-secondary-darken4) !important;
+  caret-color: var(--v-secondary-darken4) !important;
+}
+.v-application .accent {
+  background-color: var(--v-accent-base) !important;
+  border-color: var(--v-accent-base) !important;
+}
+.v-application .accent--text {
+  color: var(--v-accent-base) !important;
+  caret-color: var(--v-accent-base) !important;
+}
+.v-application .accent.lighten-5 {
+  background-color: var(--v-accent-lighten5) !important;
+  border-color: var(--v-accent-lighten5) !important;
+}
+.v-application .accent--text.text--lighten-5 {
+  color: var(--v-accent-lighten5) !important;
+  caret-color: var(--v-accent-lighten5) !important;
+}
+.v-application .accent.lighten-4 {
+  background-color: var(--v-accent-lighten4) !important;
+  border-color: var(--v-accent-lighten4) !important;
+}
+.v-application .accent--text.text--lighten-4 {
+  color: var(--v-accent-lighten4) !important;
+  caret-color: var(--v-accent-lighten4) !important;
+}
+.v-application .accent.lighten-3 {
+  background-color: var(--v-accent-lighten3) !important;
+  border-color: var(--v-accent-lighten3) !important;
+}
+.v-application .accent--text.text--lighten-3 {
+  color: var(--v-accent-lighten3) !important;
+  caret-color: var(--v-accent-lighten3) !important;
+}
+.v-application .accent.lighten-2 {
+  background-color: var(--v-accent-lighten2) !important;
+  border-color: var(--v-accent-lighten2) !important;
+}
+.v-application .accent--text.text--lighten-2 {
+  color: var(--v-accent-lighten2) !important;
+  caret-color: var(--v-accent-lighten2) !important;
+}
+.v-application .accent.lighten-1 {
+  background-color: var(--v-accent-lighten1) !important;
+  border-color: var(--v-accent-lighten1) !important;
+}
+.v-application .accent--text.text--lighten-1 {
+  color: var(--v-accent-lighten1) !important;
+  caret-color: var(--v-accent-lighten1) !important;
+}
+.v-application .accent.darken-1 {
+  background-color: var(--v-accent-darken1) !important;
+  border-color: var(--v-accent-darken1) !important;
+}
+.v-application .accent--text.text--darken-1 {
+  color: var(--v-accent-darken1) !important;
+  caret-color: var(--v-accent-darken1) !important;
+}
+.v-application .accent.darken-2 {
+  background-color: var(--v-accent-darken2) !important;
+  border-color: var(--v-accent-darken2) !important;
+}
+.v-application .accent--text.text--darken-2 {
+  color: var(--v-accent-darken2) !important;
+  caret-color: var(--v-accent-darken2) !important;
+}
+.v-application .accent.darken-3 {
+  background-color: var(--v-accent-darken3) !important;
+  border-color: var(--v-accent-darken3) !important;
+}
+.v-application .accent--text.text--darken-3 {
+  color: var(--v-accent-darken3) !important;
+  caret-color: var(--v-accent-darken3) !important;
+}
+.v-application .accent.darken-4 {
+  background-color: var(--v-accent-darken4) !important;
+  border-color: var(--v-accent-darken4) !important;
+}
+.v-application .accent--text.text--darken-4 {
+  color: var(--v-accent-darken4) !important;
+  caret-color: var(--v-accent-darken4) !important;
+}
+.v-application .error {
+  background-color: var(--v-error-base) !important;
+  border-color: var(--v-error-base) !important;
+}
+.v-application .error--text {
+  color: var(--v-error-base) !important;
+  caret-color: var(--v-error-base) !important;
+}
+.v-application .error.lighten-5 {
+  background-color: var(--v-error-lighten5) !important;
+  border-color: var(--v-error-lighten5) !important;
+}
+.v-application .error--text.text--lighten-5 {
+  color: var(--v-error-lighten5) !important;
+  caret-color: var(--v-error-lighten5) !important;
+}
+.v-application .error.lighten-4 {
+  background-color: var(--v-error-lighten4) !important;
+  border-color: var(--v-error-lighten4) !important;
+}
+.v-application .error--text.text--lighten-4 {
+  color: var(--v-error-lighten4) !important;
+  caret-color: var(--v-error-lighten4) !important;
+}
+.v-application .error.lighten-3 {
+  background-color: var(--v-error-lighten3) !important;
+  border-color: var(--v-error-lighten3) !important;
+}
+.v-application .error--text.text--lighten-3 {
+  color: var(--v-error-lighten3) !important;
+  caret-color: var(--v-error-lighten3) !important;
+}
+.v-application .error.lighten-2 {
+  background-color: var(--v-error-lighten2) !important;
+  border-color: var(--v-error-lighten2) !important;
+}
+.v-application .error--text.text--lighten-2 {
+  color: var(--v-error-lighten2) !important;
+  caret-color: var(--v-error-lighten2) !important;
+}
+.v-application .error.lighten-1 {
+  background-color: var(--v-error-lighten1) !important;
+  border-color: var(--v-error-lighten1) !important;
+}
+.v-application .error--text.text--lighten-1 {
+  color: var(--v-error-lighten1) !important;
+  caret-color: var(--v-error-lighten1) !important;
+}
+.v-application .error.darken-1 {
+  background-color: var(--v-error-darken1) !important;
+  border-color: var(--v-error-darken1) !important;
+}
+.v-application .error--text.text--darken-1 {
+  color: var(--v-error-darken1) !important;
+  caret-color: var(--v-error-darken1) !important;
+}
+.v-application .error.darken-2 {
+  background-color: var(--v-error-darken2) !important;
+  border-color: var(--v-error-darken2) !important;
+}
+.v-application .error--text.text--darken-2 {
+  color: var(--v-error-darken2) !important;
+  caret-color: var(--v-error-darken2) !important;
+}
+.v-application .error.darken-3 {
+  background-color: var(--v-error-darken3) !important;
+  border-color: var(--v-error-darken3) !important;
+}
+.v-application .error--text.text--darken-3 {
+  color: var(--v-error-darken3) !important;
+  caret-color: var(--v-error-darken3) !important;
+}
+.v-application .error.darken-4 {
+  background-color: var(--v-error-darken4) !important;
+  border-color: var(--v-error-darken4) !important;
+}
+.v-application .error--text.text--darken-4 {
+  color: var(--v-error-darken4) !important;
+  caret-color: var(--v-error-darken4) !important;
+}
+.v-application .info {
+  background-color: var(--v-info-base) !important;
+  border-color: var(--v-info-base) !important;
+}
+.v-application .info--text {
+  color: var(--v-info-base) !important;
+  caret-color: var(--v-info-base) !important;
+}
+.v-application .info.lighten-5 {
+  background-color: var(--v-info-lighten5) !important;
+  border-color: var(--v-info-lighten5) !important;
+}
+.v-application .info--text.text--lighten-5 {
+  color: var(--v-info-lighten5) !important;
+  caret-color: var(--v-info-lighten5) !important;
+}
+.v-application .info.lighten-4 {
+  background-color: var(--v-info-lighten4) !important;
+  border-color: var(--v-info-lighten4) !important;
+}
+.v-application .info--text.text--lighten-4 {
+  color: var(--v-info-lighten4) !important;
+  caret-color: var(--v-info-lighten4) !important;
+}
+.v-application .info.lighten-3 {
+  background-color: var(--v-info-lighten3) !important;
+  border-color: var(--v-info-lighten3) !important;
+}
+.v-application .info--text.text--lighten-3 {
+  color: var(--v-info-lighten3) !important;
+  caret-color: var(--v-info-lighten3) !important;
+}
+.v-application .info.lighten-2 {
+  background-color: var(--v-info-lighten2) !important;
+  border-color: var(--v-info-lighten2) !important;
+}
+.v-application .info--text.text--lighten-2 {
+  color: var(--v-info-lighten2) !important;
+  caret-color: var(--v-info-lighten2) !important;
+}
+.v-application .info.lighten-1 {
+  background-color: var(--v-info-lighten1) !important;
+  border-color: var(--v-info-lighten1) !important;
+}
+.v-application .info--text.text--lighten-1 {
+  color: var(--v-info-lighten1) !important;
+  caret-color: var(--v-info-lighten1) !important;
+}
+.v-application .info.darken-1 {
+  background-color: var(--v-info-darken1) !important;
+  border-color: var(--v-info-darken1) !important;
+}
+.v-application .info--text.text--darken-1 {
+  color: var(--v-info-darken1) !important;
+  caret-color: var(--v-info-darken1) !important;
+}
+.v-application .info.darken-2 {
+  background-color: var(--v-info-darken2) !important;
+  border-color: var(--v-info-darken2) !important;
+}
+.v-application .info--text.text--darken-2 {
+  color: var(--v-info-darken2) !important;
+  caret-color: var(--v-info-darken2) !important;
+}
+.v-application .info.darken-3 {
+  background-color: var(--v-info-darken3) !important;
+  border-color: var(--v-info-darken3) !important;
+}
+.v-application .info--text.text--darken-3 {
+  color: var(--v-info-darken3) !important;
+  caret-color: var(--v-info-darken3) !important;
+}
+.v-application .info.darken-4 {
+  background-color: var(--v-info-darken4) !important;
+  border-color: var(--v-info-darken4) !important;
+}
+.v-application .info--text.text--darken-4 {
+  color: var(--v-info-darken4) !important;
+  caret-color: var(--v-info-darken4) !important;
+}
+.v-application .success {
+  background-color: var(--v-success-base) !important;
+  border-color: var(--v-success-base) !important;
+}
+.v-application .success--text {
+  color: var(--v-success-base) !important;
+  caret-color: var(--v-success-base) !important;
+}
+.v-application .success.lighten-5 {
+  background-color: var(--v-success-lighten5) !important;
+  border-color: var(--v-success-lighten5) !important;
+}
+.v-application .success--text.text--lighten-5 {
+  color: var(--v-success-lighten5) !important;
+  caret-color: var(--v-success-lighten5) !important;
+}
+.v-application .success.lighten-4 {
+  background-color: var(--v-success-lighten4) !important;
+  border-color: var(--v-success-lighten4) !important;
+}
+.v-application .success--text.text--lighten-4 {
+  color: var(--v-success-lighten4) !important;
+  caret-color: var(--v-success-lighten4) !important;
+}
+.v-application .success.lighten-3 {
+  background-color: var(--v-success-lighten3) !important;
+  border-color: var(--v-success-lighten3) !important;
+}
+.v-application .success--text.text--lighten-3 {
+  color: var(--v-success-lighten3) !important;
+  caret-color: var(--v-success-lighten3) !important;
+}
+.v-application .success.lighten-2 {
+  background-color: var(--v-success-lighten2) !important;
+  border-color: var(--v-success-lighten2) !important;
+}
+.v-application .success--text.text--lighten-2 {
+  color: var(--v-success-lighten2) !important;
+  caret-color: var(--v-success-lighten2) !important;
+}
+.v-application .success.lighten-1 {
+  background-color: var(--v-success-lighten1) !important;
+  border-color: var(--v-success-lighten1) !important;
+}
+.v-application .success--text.text--lighten-1 {
+  color: var(--v-success-lighten1) !important;
+  caret-color: var(--v-success-lighten1) !important;
+}
+.v-application .success.darken-1 {
+  background-color: var(--v-success-darken1) !important;
+  border-color: var(--v-success-darken1) !important;
+}
+.v-application .success--text.text--darken-1 {
+  color: var(--v-success-darken1) !important;
+  caret-color: var(--v-success-darken1) !important;
+}
+.v-application .success.darken-2 {
+  background-color: var(--v-success-darken2) !important;
+  border-color: var(--v-success-darken2) !important;
+}
+.v-application .success--text.text--darken-2 {
+  color: var(--v-success-darken2) !important;
+  caret-color: var(--v-success-darken2) !important;
+}
+.v-application .success.darken-3 {
+  background-color: var(--v-success-darken3) !important;
+  border-color: var(--v-success-darken3) !important;
+}
+.v-application .success--text.text--darken-3 {
+  color: var(--v-success-darken3) !important;
+  caret-color: var(--v-success-darken3) !important;
+}
+.v-application .success.darken-4 {
+  background-color: var(--v-success-darken4) !important;
+  border-color: var(--v-success-darken4) !important;
+}
+.v-application .success--text.text--darken-4 {
+  color: var(--v-success-darken4) !important;
+  caret-color: var(--v-success-darken4) !important;
+}
+.v-application .warning {
+  background-color: var(--v-warning-base) !important;
+  border-color: var(--v-warning-base) !important;
+}
+.v-application .warning--text {
+  color: var(--v-warning-base) !important;
+  caret-color: var(--v-warning-base) !important;
+}
+.v-application .warning.lighten-5 {
+  background-color: var(--v-warning-lighten5) !important;
+  border-color: var(--v-warning-lighten5) !important;
+}
+.v-application .warning--text.text--lighten-5 {
+  color: var(--v-warning-lighten5) !important;
+  caret-color: var(--v-warning-lighten5) !important;
+}
+.v-application .warning.lighten-4 {
+  background-color: var(--v-warning-lighten4) !important;
+  border-color: var(--v-warning-lighten4) !important;
+}
+.v-application .warning--text.text--lighten-4 {
+  color: var(--v-warning-lighten4) !important;
+  caret-color: var(--v-warning-lighten4) !important;
+}
+.v-application .warning.lighten-3 {
+  background-color: var(--v-warning-lighten3) !important;
+  border-color: var(--v-warning-lighten3) !important;
+}
+.v-application .warning--text.text--lighten-3 {
+  color: var(--v-warning-lighten3) !important;
+  caret-color: var(--v-warning-lighten3) !important;
+}
+.v-application .warning.lighten-2 {
+  background-color: var(--v-warning-lighten2) !important;
+  border-color: var(--v-warning-lighten2) !important;
+}
+.v-application .warning--text.text--lighten-2 {
+  color: var(--v-warning-lighten2) !important;
+  caret-color: var(--v-warning-lighten2) !important;
+}
+.v-application .warning.lighten-1 {
+  background-color: var(--v-warning-lighten1) !important;
+  border-color: var(--v-warning-lighten1) !important;
+}
+.v-application .warning--text.text--lighten-1 {
+  color: var(--v-warning-lighten1) !important;
+  caret-color: var(--v-warning-lighten1) !important;
+}
+.v-application .warning.darken-1 {
+  background-color: var(--v-warning-darken1) !important;
+  border-color: var(--v-warning-darken1) !important;
+}
+.v-application .warning--text.text--darken-1 {
+  color: var(--v-warning-darken1) !important;
+  caret-color: var(--v-warning-darken1) !important;
+}
+.v-application .warning.darken-2 {
+  background-color: var(--v-warning-darken2) !important;
+  border-color: var(--v-warning-darken2) !important;
+}
+.v-application .warning--text.text--darken-2 {
+  color: var(--v-warning-darken2) !important;
+  caret-color: var(--v-warning-darken2) !important;
+}
+.v-application .warning.darken-3 {
+  background-color: var(--v-warning-darken3) !important;
+  border-color: var(--v-warning-darken3) !important;
+}
+.v-application .warning--text.text--darken-3 {
+  color: var(--v-warning-darken3) !important;
+  caret-color: var(--v-warning-darken3) !important;
+}
+.v-application .warning.darken-4 {
+  background-color: var(--v-warning-darken4) !important;
+  border-color: var(--v-warning-darken4) !important;
+}
+.v-application .warning--text.text--darken-4 {
+  color: var(--v-warning-darken4) !important;
+  caret-color: var(--v-warning-darken4) !important;
+}
+.v-application .opso {
+  background-color: var(--v-opso-base) !important;
+  border-color: var(--v-opso-base) !important;
+}
+.v-application .opso--text {
+  color: var(--v-opso-base) !important;
+  caret-color: var(--v-opso-base) !important;
+}
+.v-application .opso.lighten-5 {
+  background-color: var(--v-opso-lighten5) !important;
+  border-color: var(--v-opso-lighten5) !important;
+}
+.v-application .opso--text.text--lighten-5 {
+  color: var(--v-opso-lighten5) !important;
+  caret-color: var(--v-opso-lighten5) !important;
+}
+.v-application .opso.lighten-4 {
+  background-color: var(--v-opso-lighten4) !important;
+  border-color: var(--v-opso-lighten4) !important;
+}
+.v-application .opso--text.text--lighten-4 {
+  color: var(--v-opso-lighten4) !important;
+  caret-color: var(--v-opso-lighten4) !important;
+}
+.v-application .opso.lighten-3 {
+  background-color: var(--v-opso-lighten3) !important;
+  border-color: var(--v-opso-lighten3) !important;
+}
+.v-application .opso--text.text--lighten-3 {
+  color: var(--v-opso-lighten3) !important;
+  caret-color: var(--v-opso-lighten3) !important;
+}
+.v-application .opso.lighten-2 {
+  background-color: var(--v-opso-lighten2) !important;
+  border-color: var(--v-opso-lighten2) !important;
+}
+.v-application .opso--text.text--lighten-2 {
+  color: var(--v-opso-lighten2) !important;
+  caret-color: var(--v-opso-lighten2) !important;
+}
+.v-application .opso.lighten-1 {
+  background-color: var(--v-opso-lighten1) !important;
+  border-color: var(--v-opso-lighten1) !important;
+}
+.v-application .opso--text.text--lighten-1 {
+  color: var(--v-opso-lighten1) !important;
+  caret-color: var(--v-opso-lighten1) !important;
+}
+.v-application .opso.darken-1 {
+  background-color: var(--v-opso-darken1) !important;
+  border-color: var(--v-opso-darken1) !important;
+}
+.v-application .opso--text.text--darken-1 {
+  color: var(--v-opso-darken1) !important;
+  caret-color: var(--v-opso-darken1) !important;
+}
+.v-application .opso.darken-2 {
+  background-color: var(--v-opso-darken2) !important;
+  border-color: var(--v-opso-darken2) !important;
+}
+.v-application .opso--text.text--darken-2 {
+  color: var(--v-opso-darken2) !important;
+  caret-color: var(--v-opso-darken2) !important;
+}
+.v-application .opso.darken-3 {
+  background-color: var(--v-opso-darken3) !important;
+  border-color: var(--v-opso-darken3) !important;
+}
+.v-application .opso--text.text--darken-3 {
+  color: var(--v-opso-darken3) !important;
+  caret-color: var(--v-opso-darken3) !important;
+}
+.v-application .opso.darken-4 {
+  background-color: var(--v-opso-darken4) !important;
+  border-color: var(--v-opso-darken4) !important;
+}
+.v-application .opso--text.text--darken-4 {
+  color: var(--v-opso-darken4) !important;
+  caret-color: var(--v-opso-darken4) !important;
+}
+.v-application .medlibro {
+  background-color: var(--v-medlibro-base) !important;
+  border-color: var(--v-medlibro-base) !important;
+}
+.v-application .medlibro--text {
+  color: var(--v-medlibro-base) !important;
+  caret-color: var(--v-medlibro-base) !important;
+}
+.v-application .medlibro.lighten-5 {
+  background-color: var(--v-medlibro-lighten5) !important;
+  border-color: var(--v-medlibro-lighten5) !important;
+}
+.v-application .medlibro--text.text--lighten-5 {
+  color: var(--v-medlibro-lighten5) !important;
+  caret-color: var(--v-medlibro-lighten5) !important;
+}
+.v-application .medlibro.lighten-4 {
+  background-color: var(--v-medlibro-lighten4) !important;
+  border-color: var(--v-medlibro-lighten4) !important;
+}
+.v-application .medlibro--text.text--lighten-4 {
+  color: var(--v-medlibro-lighten4) !important;
+  caret-color: var(--v-medlibro-lighten4) !important;
+}
+.v-application .medlibro.lighten-3 {
+  background-color: var(--v-medlibro-lighten3) !important;
+  border-color: var(--v-medlibro-lighten3) !important;
+}
+.v-application .medlibro--text.text--lighten-3 {
+  color: var(--v-medlibro-lighten3) !important;
+  caret-color: var(--v-medlibro-lighten3) !important;
+}
+.v-application .medlibro.lighten-2 {
+  background-color: var(--v-medlibro-lighten2) !important;
+  border-color: var(--v-medlibro-lighten2) !important;
+}
+.v-application .medlibro--text.text--lighten-2 {
+  color: var(--v-medlibro-lighten2) !important;
+  caret-color: var(--v-medlibro-lighten2) !important;
+}
+.v-application .medlibro.lighten-1 {
+  background-color: var(--v-medlibro-lighten1) !important;
+  border-color: var(--v-medlibro-lighten1) !important;
+}
+.v-application .medlibro--text.text--lighten-1 {
+  color: var(--v-medlibro-lighten1) !important;
+  caret-color: var(--v-medlibro-lighten1) !important;
+}
+.v-application .medlibro.darken-1 {
+  background-color: var(--v-medlibro-darken1) !important;
+  border-color: var(--v-medlibro-darken1) !important;
+}
+.v-application .medlibro--text.text--darken-1 {
+  color: var(--v-medlibro-darken1) !important;
+  caret-color: var(--v-medlibro-darken1) !important;
+}
+.v-application .medlibro.darken-2 {
+  background-color: var(--v-medlibro-darken2) !important;
+  border-color: var(--v-medlibro-darken2) !important;
+}
+.v-application .medlibro--text.text--darken-2 {
+  color: var(--v-medlibro-darken2) !important;
+  caret-color: var(--v-medlibro-darken2) !important;
+}
+.v-application .medlibro.darken-3 {
+  background-color: var(--v-medlibro-darken3) !important;
+  border-color: var(--v-medlibro-darken3) !important;
+}
+.v-application .medlibro--text.text--darken-3 {
+  color: var(--v-medlibro-darken3) !important;
+  caret-color: var(--v-medlibro-darken3) !important;
+}
+.v-application .medlibro.darken-4 {
+  background-color: var(--v-medlibro-darken4) !important;
+  border-color: var(--v-medlibro-darken4) !important;
+}
+.v-application .medlibro--text.text--darken-4 {
+  color: var(--v-medlibro-darken4) !important;
+  caret-color: var(--v-medlibro-darken4) !important;
+}
+.v-application .border {
+  background-color: var(--v-border-base) !important;
+  border-color: var(--v-border-base) !important;
+}
+.v-application .border--text {
+  color: var(--v-border-base) !important;
+  caret-color: var(--v-border-base) !important;
+}
+.v-application .border.lighten-5 {
+  background-color: var(--v-border-lighten5) !important;
+  border-color: var(--v-border-lighten5) !important;
+}
+.v-application .border--text.text--lighten-5 {
+  color: var(--v-border-lighten5) !important;
+  caret-color: var(--v-border-lighten5) !important;
+}
+.v-application .border.lighten-4 {
+  background-color: var(--v-border-lighten4) !important;
+  border-color: var(--v-border-lighten4) !important;
+}
+.v-application .border--text.text--lighten-4 {
+  color: var(--v-border-lighten4) !important;
+  caret-color: var(--v-border-lighten4) !important;
+}
+.v-application .border.lighten-3 {
+  background-color: var(--v-border-lighten3) !important;
+  border-color: var(--v-border-lighten3) !important;
+}
+.v-application .border--text.text--lighten-3 {
+  color: var(--v-border-lighten3) !important;
+  caret-color: var(--v-border-lighten3) !important;
+}
+.v-application .border.lighten-2 {
+  background-color: var(--v-border-lighten2) !important;
+  border-color: var(--v-border-lighten2) !important;
+}
+.v-application .border--text.text--lighten-2 {
+  color: var(--v-border-lighten2) !important;
+  caret-color: var(--v-border-lighten2) !important;
+}
+.v-application .border.lighten-1 {
+  background-color: var(--v-border-lighten1) !important;
+  border-color: var(--v-border-lighten1) !important;
+}
+.v-application .border--text.text--lighten-1 {
+  color: var(--v-border-lighten1) !important;
+  caret-color: var(--v-border-lighten1) !important;
+}
+.v-application .border.darken-1 {
+  background-color: var(--v-border-darken1) !important;
+  border-color: var(--v-border-darken1) !important;
+}
+.v-application .border--text.text--darken-1 {
+  color: var(--v-border-darken1) !important;
+  caret-color: var(--v-border-darken1) !important;
+}
+.v-application .border.darken-2 {
+  background-color: var(--v-border-darken2) !important;
+  border-color: var(--v-border-darken2) !important;
+}
+.v-application .border--text.text--darken-2 {
+  color: var(--v-border-darken2) !important;
+  caret-color: var(--v-border-darken2) !important;
+}
+.v-application .border.darken-3 {
+  background-color: var(--v-border-darken3) !important;
+  border-color: var(--v-border-darken3) !important;
+}
+.v-application .border--text.text--darken-3 {
+  color: var(--v-border-darken3) !important;
+  caret-color: var(--v-border-darken3) !important;
+}
+.v-application .border.darken-4 {
+  background-color: var(--v-border-darken4) !important;
+  border-color: var(--v-border-darken4) !important;
+}
+.v-application .border--text.text--darken-4 {
+  color: var(--v-border-darken4) !important;
+  caret-color: var(--v-border-darken4) !important;
+}
+.v-application .background {
+  background-color: var(--v-background-base) !important;
+  border-color: var(--v-background-base) !important;
+}
+.v-application .background--text {
+  color: var(--v-background-base) !important;
+  caret-color: var(--v-background-base) !important;
+}
+.v-application .background.lighten-5 {
+  background-color: var(--v-background-lighten5) !important;
+  border-color: var(--v-background-lighten5) !important;
+}
+.v-application .background--text.text--lighten-5 {
+  color: var(--v-background-lighten5) !important;
+  caret-color: var(--v-background-lighten5) !important;
+}
+.v-application .background.lighten-4 {
+  background-color: var(--v-background-lighten4) !important;
+  border-color: var(--v-background-lighten4) !important;
+}
+.v-application .background--text.text--lighten-4 {
+  color: var(--v-background-lighten4) !important;
+  caret-color: var(--v-background-lighten4) !important;
+}
+.v-application .background.lighten-3 {
+  background-color: var(--v-background-lighten3) !important;
+  border-color: var(--v-background-lighten3) !important;
+}
+.v-application .background--text.text--lighten-3 {
+  color: var(--v-background-lighten3) !important;
+  caret-color: var(--v-background-lighten3) !important;
+}
+.v-application .background.lighten-2 {
+  background-color: var(--v-background-lighten2) !important;
+  border-color: var(--v-background-lighten2) !important;
+}
+.v-application .background--text.text--lighten-2 {
+  color: var(--v-background-lighten2) !important;
+  caret-color: var(--v-background-lighten2) !important;
+}
+.v-application .background.lighten-1 {
+  background-color: var(--v-background-lighten1) !important;
+  border-color: var(--v-background-lighten1) !important;
+}
+.v-application .background--text.text--lighten-1 {
+  color: var(--v-background-lighten1) !important;
+  caret-color: var(--v-background-lighten1) !important;
+}
+.v-application .background.darken-1 {
+  background-color: var(--v-background-darken1) !important;
+  border-color: var(--v-background-darken1) !important;
+}
+.v-application .background--text.text--darken-1 {
+  color: var(--v-background-darken1) !important;
+  caret-color: var(--v-background-darken1) !important;
+}
+.v-application .background.darken-2 {
+  background-color: var(--v-background-darken2) !important;
+  border-color: var(--v-background-darken2) !important;
+}
+.v-application .background--text.text--darken-2 {
+  color: var(--v-background-darken2) !important;
+  caret-color: var(--v-background-darken2) !important;
+}
+.v-application .background.darken-3 {
+  background-color: var(--v-background-darken3) !important;
+  border-color: var(--v-background-darken3) !important;
+}
+.v-application .background--text.text--darken-3 {
+  color: var(--v-background-darken3) !important;
+  caret-color: var(--v-background-darken3) !important;
+}
+.v-application .background.darken-4 {
+  background-color: var(--v-background-darken4) !important;
+  border-color: var(--v-background-darken4) !important;
+}
+.v-application .background--text.text--darken-4 {
+  color: var(--v-background-darken4) !important;
+  caret-color: var(--v-background-darken4) !important;
+}
+.v-application .binary {
+  background-color: var(--v-binary-base) !important;
+  border-color: var(--v-binary-base) !important;
+}
+.v-application .binary--text {
+  color: var(--v-binary-base) !important;
+  caret-color: var(--v-binary-base) !important;
+}
+.v-application .binary.lighten-5 {
+  background-color: var(--v-binary-lighten5) !important;
+  border-color: var(--v-binary-lighten5) !important;
+}
+.v-application .binary--text.text--lighten-5 {
+  color: var(--v-binary-lighten5) !important;
+  caret-color: var(--v-binary-lighten5) !important;
+}
+.v-application .binary.lighten-4 {
+  background-color: var(--v-binary-lighten4) !important;
+  border-color: var(--v-binary-lighten4) !important;
+}
+.v-application .binary--text.text--lighten-4 {
+  color: var(--v-binary-lighten4) !important;
+  caret-color: var(--v-binary-lighten4) !important;
+}
+.v-application .binary.lighten-3 {
+  background-color: var(--v-binary-lighten3) !important;
+  border-color: var(--v-binary-lighten3) !important;
+}
+.v-application .binary--text.text--lighten-3 {
+  color: var(--v-binary-lighten3) !important;
+  caret-color: var(--v-binary-lighten3) !important;
+}
+.v-application .binary.lighten-2 {
+  background-color: var(--v-binary-lighten2) !important;
+  border-color: var(--v-binary-lighten2) !important;
+}
+.v-application .binary--text.text--lighten-2 {
+  color: var(--v-binary-lighten2) !important;
+  caret-color: var(--v-binary-lighten2) !important;
+}
+.v-application .binary.lighten-1 {
+  background-color: var(--v-binary-lighten1) !important;
+  border-color: var(--v-binary-lighten1) !important;
+}
+.v-application .binary--text.text--lighten-1 {
+  color: var(--v-binary-lighten1) !important;
+  caret-color: var(--v-binary-lighten1) !important;
+}
+.v-application .binary.darken-1 {
+  background-color: var(--v-binary-darken1) !important;
+  border-color: var(--v-binary-darken1) !important;
+}
+.v-application .binary--text.text--darken-1 {
+  color: var(--v-binary-darken1) !important;
+  caret-color: var(--v-binary-darken1) !important;
+}
+.v-application .binary.darken-2 {
+  background-color: var(--v-binary-darken2) !important;
+  border-color: var(--v-binary-darken2) !important;
+}
+.v-application .binary--text.text--darken-2 {
+  color: var(--v-binary-darken2) !important;
+  caret-color: var(--v-binary-darken2) !important;
+}
+.v-application .binary.darken-3 {
+  background-color: var(--v-binary-darken3) !important;
+  border-color: var(--v-binary-darken3) !important;
+}
+.v-application .binary--text.text--darken-3 {
+  color: var(--v-binary-darken3) !important;
+  caret-color: var(--v-binary-darken3) !important;
+}
+.v-application .binary.darken-4 {
+  background-color: var(--v-binary-darken4) !important;
+  border-color: var(--v-binary-darken4) !important;
+}
+.v-application .binary--text.text--darken-4 {
+  color: var(--v-binary-darken4) !important;
+  caret-color: var(--v-binary-darken4) !important;
+}
+.v-application .binary-reverse {
+  background-color: var(--v-binary-reverse-base) !important;
+  border-color: var(--v-binary-reverse-base) !important;
+}
+.v-application .binary-reverse--text {
+  color: var(--v-binary-reverse-base) !important;
+  caret-color: var(--v-binary-reverse-base) !important;
+}
+.v-application .binary-reverse.lighten-5 {
+  background-color: var(--v-binary-reverse-lighten5) !important;
+  border-color: var(--v-binary-reverse-lighten5) !important;
+}
+.v-application .binary-reverse--text.text--lighten-5 {
+  color: var(--v-binary-reverse-lighten5) !important;
+  caret-color: var(--v-binary-reverse-lighten5) !important;
+}
+.v-application .binary-reverse.lighten-4 {
+  background-color: var(--v-binary-reverse-lighten4) !important;
+  border-color: var(--v-binary-reverse-lighten4) !important;
+}
+.v-application .binary-reverse--text.text--lighten-4 {
+  color: var(--v-binary-reverse-lighten4) !important;
+  caret-color: var(--v-binary-reverse-lighten4) !important;
+}
+.v-application .binary-reverse.lighten-3 {
+  background-color: var(--v-binary-reverse-lighten3) !important;
+  border-color: var(--v-binary-reverse-lighten3) !important;
+}
+.v-application .binary-reverse--text.text--lighten-3 {
+  color: var(--v-binary-reverse-lighten3) !important;
+  caret-color: var(--v-binary-reverse-lighten3) !important;
+}
+.v-application .binary-reverse.lighten-2 {
+  background-color: var(--v-binary-reverse-lighten2) !important;
+  border-color: var(--v-binary-reverse-lighten2) !important;
+}
+.v-application .binary-reverse--text.text--lighten-2 {
+  color: var(--v-binary-reverse-lighten2) !important;
+  caret-color: var(--v-binary-reverse-lighten2) !important;
+}
+.v-application .binary-reverse.lighten-1 {
+  background-color: var(--v-binary-reverse-lighten1) !important;
+  border-color: var(--v-binary-reverse-lighten1) !important;
+}
+.v-application .binary-reverse--text.text--lighten-1 {
+  color: var(--v-binary-reverse-lighten1) !important;
+  caret-color: var(--v-binary-reverse-lighten1) !important;
+}
+.v-application .binary-reverse.darken-1 {
+  background-color: var(--v-binary-reverse-darken1) !important;
+  border-color: var(--v-binary-reverse-darken1) !important;
+}
+.v-application .binary-reverse--text.text--darken-1 {
+  color: var(--v-binary-reverse-darken1) !important;
+  caret-color: var(--v-binary-reverse-darken1) !important;
+}
+.v-application .binary-reverse.darken-2 {
+  background-color: var(--v-binary-reverse-darken2) !important;
+  border-color: var(--v-binary-reverse-darken2) !important;
+}
+.v-application .binary-reverse--text.text--darken-2 {
+  color: var(--v-binary-reverse-darken2) !important;
+  caret-color: var(--v-binary-reverse-darken2) !important;
+}
+.v-application .binary-reverse.darken-3 {
+  background-color: var(--v-binary-reverse-darken3) !important;
+  border-color: var(--v-binary-reverse-darken3) !important;
+}
+.v-application .binary-reverse--text.text--darken-3 {
+  color: var(--v-binary-reverse-darken3) !important;
+  caret-color: var(--v-binary-reverse-darken3) !important;
+}
+.v-application .binary-reverse.darken-4 {
+  background-color: var(--v-binary-reverse-darken4) !important;
+  border-color: var(--v-binary-reverse-darken4) !important;
+}
+.v-application .binary-reverse--text.text--darken-4 {
+  color: var(--v-binary-reverse-darken4) !important;
+  caret-color: var(--v-binary-reverse-darken4) !important;
+}</style><link rel="modulepreload" as="script" crossorigin="" href="/assets/PlaylistsPage-DZg537i-.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/lodash-Do4f-ta7.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/playlists-CAej7X3U.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VTextField-CT7tgzWX.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VInput-BKVUZP9a.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-By8NiXQZ.js"><link rel="stylesheet" crossorigin="" href="/assets/index-Cek1bV66.css"><link rel="stylesheet" crossorigin="" href="/assets/VInput-D-729cEf.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-B8CRZBZt.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-BrqQVgiC.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-qxqBqTOB.js"><link rel="stylesheet" crossorigin="" href="/assets/index-CVVKbSrD.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-C1pNNSpG.js"><link rel="stylesheet" crossorigin="" href="/assets/VTextField-Dzvgicjj.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VSpacer-BQJI7pHn.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VSkeletonLoader-CvCJNrHF.js"><link rel="stylesheet" crossorigin="" href="/assets/VSkeletonLoader-C57Hiyzz.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VList-By3t70wp.js"><link rel="stylesheet" crossorigin="" href="/assets/VList-DnfJ-dOX.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-BlV-lnsx.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-sLtnYYr_.js"><link rel="stylesheet" crossorigin="" href="/assets/index-BigGFxva.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VListItemAction-qHVBtgVx.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/ClientLayout-C2EYz5yZ.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VAppBar-C_aUnkCM.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VImg-Cv3kCZbk.js"><link rel="stylesheet" crossorigin="" href="/assets/VImg-BlhfxeV7.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-BjaFTGv8.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-DFuf84FE.js"><link rel="stylesheet" crossorigin="" href="/assets/VAppBar-W5vRt7nm.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VAppBarNavIcon-Bk5Q_hb4.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VBtn-Chjflh8x.js"><link rel="stylesheet" crossorigin="" href="/assets/VBtn-BIC3VVQ1.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VAvatar-BMBIDj5h.js"><link rel="stylesheet" crossorigin="" href="/assets/VAvatar-BUxYne3p.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VNavigationDrawer-7OAzvkwT.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-eoxEDGvQ.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-_8ietVvA.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-Dei0ugVd.js"><link rel="stylesheet" crossorigin="" href="/assets/index-yZG_eEIc.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-BSaP3Y0g.js"><link rel="stylesheet" crossorigin="" href="/assets/VNavigationDrawer-DPEBhp88.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VListItemIcon-IjOHk8Pb.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VBadge-BBRbYIwu.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-smeRWBSW.js"><link rel="stylesheet" crossorigin="" href="/assets/VBadge-BWaMeF0p.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VMain-CQOyqd7s.js"><link rel="stylesheet" crossorigin="" href="/assets/VMain-D4N7uXnB.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/HomeButton-B7etD-oA.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-AtrV5JHa.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/PlaylistDialog-Ck-Qsorp.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VDialog-BJolCos7.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-3FX65K1z.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-DXw70iS9.js"><link rel="stylesheet" crossorigin="" href="/assets/VDialog-DkrJy-Kc.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-KE25yfDr.js"><link rel="stylesheet" crossorigin="" href="/assets/index-0wFbg7uQ.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VForm-DwNr0NtU.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VTextarea-De2P0H9n.js"><link rel="stylesheet" crossorigin="" href="/assets/VTextarea-CyCP7lga.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/PinnedPlaylists-nYl_M_w-.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/ConfirmationDialog-B5PUl_TJ.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/users-CYN_otuP.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/AnswerDialog-BfjbLpTp.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VRow-BzW0Wy6i.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VMenu-BV9befNV.js"><link rel="stylesheet" crossorigin="" href="/assets/VMenu-CAv4e1sw.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VChip-BGUsr_OG.js"><link rel="stylesheet" crossorigin="" href="/assets/VChip-D7W74so1.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VBtnToggle-B3wEGKXC.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VItemGroup-CzFvgA87.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/index-JrUxX5Np.js"><link rel="stylesheet" crossorigin="" href="/assets/VItemGroup-CnpfATjz.css"><link rel="stylesheet" crossorigin="" href="/assets/VBtnToggle--1fdPxmc.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VDivider-BB2sgvH5.js"><link rel="stylesheet" crossorigin="" href="/assets/VDivider-B7De1bWx.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VCheckbox-C_C39YLQ.js"><link rel="stylesheet" crossorigin="" href="/assets/VCheckbox-CLRRSaPl.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/ContributionQuestionsDialog-ByXiIBLt.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/ContributionImagesSection-D4QWOEvL.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VDataTable-BCctScJO.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VSelect-bKm0rAer.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VSubheader-DfDaBt4F.js"><link rel="stylesheet" crossorigin="" href="/assets/VSubheader-5mnqoxLb.css"><link rel="stylesheet" crossorigin="" href="/assets/VSelect-DonCJy8q.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VSimpleTable-CaPkTAsN.js"><link rel="stylesheet" crossorigin="" href="/assets/VSimpleTable-CU47C-o2.css"><link rel="stylesheet" crossorigin="" href="/assets/VDataTable-C6NOyssn.css"><link rel="stylesheet" crossorigin="" href="/assets/ContributionImagesSection-D7q9zG_b.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VAutocomplete-z7NtCVcm.js"><link rel="stylesheet" crossorigin="" href="/assets/VAutocomplete-CjTmqqn8.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VTabItem-BDlRzVfv.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VWindowItem-D2MpPWhK.js"><link rel="stylesheet" crossorigin="" href="/assets/VWindowItem-BcX-Wt0X.css"><link rel="stylesheet" crossorigin="" href="/assets/VTabItem-LHjy5dvl.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/PrimaryAutocomplete-v9ZgN1SP.js"><link rel="stylesheet" crossorigin="" href="/assets/PrimaryAutocomplete-DfXDmaWG.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/VCarouselItem-Ba-bHn0G.js"><link rel="stylesheet" crossorigin="" href="/assets/VCarouselItem-BwiVHvv1.css"><link rel="modulepreload" as="script" crossorigin="" href="/assets/ClinicalCaseDialog-F1b_yzFs.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/utils-fK4_zk7F.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/AppFooter-CMFRk4Ks.js"><link rel="stylesheet" crossorigin="" href="/assets/AppFooter-D8I-cMwD.css"></head>
+	<body>
+		<noscript>
+			<strong>
+				We're sorry but MedLibro doesn't work properly without
+				JavaScript enabled. Please enable it to continue.
+			</strong>
+		</noscript>
+		<div data-app="true" class="v-application v-application--is-ltr theme--light" id="app"><div class="v-application--wrap"><div><div><header class="v-sheet theme--light v-toolbar v-toolbar--flat v-app-bar v-app-bar--fixed" data-booted="true" style="height: 64px; margin-top: 0px; transform: translateY(0px); left: 256px; right: 0px; background: var(--v-background-base);"><div class="v-toolbar__content" style="height: 64px;"><!----><!----><div class="spacer"></div><!----><div class="v-avatar binary" style="height: 35px; min-width: 35px; width: 35px;"><i aria-hidden="true" class="v-icon notranslate mdi mdi-account theme--light binary-reverse--text"></i></div></div></header><nav class="v-navigation-drawer v-navigation-drawer--fixed v-navigation-drawer--floating v-navigation-drawer--open theme--light transparent" data-booted="true" style="height: 100vh; top: 0px; max-height: calc(100% + 0px); transform: translateX(0%); width: 256px; border-right: 1px var(--v-border-base) solid !important;"><div class="v-navigation-drawer__content"><div class="v-list v-sheet theme--light"><div tabindex="-1" class="v-list-item v-list-item--dense theme--light"><div class="v-list-item__content"><div style="display: flex; gap: 6px; place-items: center;"><img src="/assets/opso-light-B0mcZpiX.png" style="width: 32px; height: 32px;"><div class="font-weight-bold text-subtitle-1"> MedLibro </div></div></div><span class="v-list-item__action-text"><button type="button" class="v-btn v-btn--icon v-btn--round theme--light v-size--small"><span class="v-btn__content"><i aria-hidden="true" class="v-icon notranslate mdi mdi-fullscreen theme--light"></i></span></button><button type="button" class="v-btn v-btn--icon v-btn--round theme--light v-size--small"><span class="v-btn__content"><i aria-hidden="true" class="v-icon notranslate mdi mdi-lightbulb theme--light"></i></span></button></span></div></div><div class="v-list v-sheet theme--light v-list--nav"><a href="/dashboard" class="v-list-item v-list-item--link theme--light" tabindex="0"><div class="v-list-item__icon"><div><i aria-hidden="true" class="v-icon notranslate mdi mdi-view-dashboard theme--light"></i></div></div><div class="v-list-item__title font-weight-bold"> Tableau de bord </div><span class="v-list-item__action-text d-flex"><!----><!----><!----><!----></span></a><a href="/sessions" class="v-list-item v-list-item--link theme--light" tabindex="0"><div class="v-list-item__icon"><div><i aria-hidden="true" class="v-icon notranslate mdi mdi-human-male-board theme--light"></i></div></div><div class="v-list-item__title font-weight-bold"> Sessions </div><span class="v-list-item__action-text d-flex"><!----><!----><!----><!----></span></a><a href="/memorix" class="v-list-item v-list-item--link theme--light" tabindex="0"><div class="v-list-item__icon"><div><i aria-hidden="true" class="v-icon notranslate mdi mdi-brain theme--light"></i></div></div><div class="v-list-item__title font-weight-bold"> Memorix </div><span class="v-list-item__action-text d-flex"><!----><!----><!----><!----></span></a><a href="/playlists" aria-current="page" class="binary--text v-list-item--active v-list-item v-list-item--link theme--light" tabindex="0"><div class="v-list-item__icon"><div><i aria-hidden="true" class="v-icon notranslate mdi mdi-playlist-star theme--light"></i></div></div><div class="v-list-item__title font-weight-bold"> Playlists </div><span class="v-list-item__action-text d-flex"><!----><!----><!----><!----></span></a><a href="/revision" class="v-list-item v-list-item--link theme--light" tabindex="0"><div class="v-list-item__icon"><div><i aria-hidden="true" class="v-icon notranslate mdi mdi-chair-school theme--light"></i></div></div><div class="v-list-item__title font-weight-bold"> Révision </div><span class="v-list-item__action-text d-flex"><!----><!----><!----><i aria-hidden="true" class="v-icon notranslate mdi mdi-alert theme--light warning--text"></i></span></a><a href="/exam" class="v-list-item v-list-item--link theme--light" tabindex="0"><div class="v-list-item__icon"><div><i aria-hidden="true" class="v-icon notranslate mdi mdi-timer theme--light"></i></div></div><div class="v-list-item__title font-weight-bold"> Examen </div><span class="v-list-item__action-text d-flex"><!----><!----><!----><!----></span></a><a href="/prioritizer" class="v-list-item v-list-item--link theme--light" tabindex="0" style="display: none;"><div class="v-list-item__icon"><div><i aria-hidden="true" class="v-icon notranslate mdi mdi-bullseye-arrow theme--light"></i></div></div><div class="v-list-item__title font-weight-bold"> Prioritizer </div><span class="v-list-item__action-text d-flex"><i aria-hidden="true" class="v-icon notranslate mdi mdi-bug theme--light error--text"></i><i aria-hidden="true" class="v-icon notranslate mdi mdi-test-tube theme--light warning--text"></i><i aria-hidden="true" class="v-icon notranslate mdi mdi-new-box theme--light success--text"></i><!----></span></a><a href="/profile" class="v-list-item v-list-item--link theme--light" tabindex="0"><div class="v-list-item__icon"><div><i aria-hidden="true" class="v-icon notranslate mdi mdi-account theme--light"></i></div></div><div class="v-list-item__title font-weight-bold"> Profil </div><span class="v-list-item__action-text d-flex"><!----><!----><!----><!----></span></a><a href="/x/statistics" class="v-list-item v-list-item--link theme--light" tabindex="0" target="_blank" style="display: none;"><div class="v-list-item__icon"><div><i aria-hidden="true" class="v-icon notranslate mdi mdi-shield-check theme--light"></i></div></div><div class="v-list-item__title font-weight-bold"> MedX </div><span class="v-list-item__action-text d-flex"><!----><!----><!----><!----></span></a><div tabindex="0" class="v-list-item v-list-item--link theme--light"><div class="v-list-item__icon"><div><i aria-hidden="true" class="v-icon notranslate mdi mdi-power theme--light"></i></div></div><div class="v-list-item__title font-weight-bold"> Se déconnecter </div><span class="v-list-item__action-text d-flex"><!----><!----><!----><!----></span></div></div></div><div class="v-navigation-drawer__border"></div></nav><main class="v-main" data-booted="true" style="padding: 64px 0px 0px 256px;"><div class="v-main__wrap"><div data-v-2c67e4a2="" class="container h-100 container--fluid" style="display: grid; grid-template-rows: auto 1fr; gap: 12px;"><div data-v-2c67e4a2="" class="d-flex"><div data-v-2c67e4a2="" class="v-input v-input--hide-details v-input--dense theme--light v-text-field v-text-field--single-line v-text-field--solo v-text-field--solo-flat v-text-field--is-booted v-text-field--enclosed v-text-field--placeholder"><div class="v-input__control"><div class="v-input__slot"><div class="v-input__prepend-inner"><div class="v-input__icon v-input__icon--prepend-inner"><i aria-hidden="true" class="v-icon notranslate mdi mdi-magnify theme--light"></i></div></div><div class="v-text-field__slot"><input id="input-56" placeholder="Nom ou description de la playlist" type="text"></div></div></div></div><div data-v-2c67e4a2="" class="spacer"></div><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--text theme--light v-size--default primary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-plus-circle theme--light"></i> Ajouter </span></button></div><div data-v-2c67e4a2="" class="overflow-auto transparent flex-grow-1 v-card v-sheet v-sheet--outlined theme--light" style="border: 2px var(--v-border-base) solid !important;"><div class="v-card__title text-subtitle-1 font-weight-bold pa-3 pb-0"><div class="d-flex flex-column"><div class="text--primary" style="display: flex; place-items: center;"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-pin theme--light"></i><span>Playlists Épinglées</span></div><span class="text-caption text--secondary">Accès rapide à vos playlists favorites</span></div></div><div class="v-card__text pa-0 text--primary" style="display: flex; flex-direction: column; gap: 12px;"><div><div class="text-center text-overline text--secondary pa-3 py-16" style="display: grid; place-items: center;"> Épinglez vos playlists préférées pour les retrouver facilement </div></div></div></div><div data-v-2c67e4a2=""><div data-v-2c67e4a2="" role="list" class="v-list transparent v-sheet theme--light v-list--dense"><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 21 chir </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 245 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 21 medical ZID  </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 368 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 22 chir </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 300 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 22 medical ZID </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 406 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 23 chir </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 347 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 23 médical  </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 624 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 24 chir**** </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 148 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 24 medical **** </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 310 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 25 A CHIR </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 93 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 25 A MEDICAL </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 58 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 25 B CHIR </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 72 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 25  BIOLOGIE </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 448 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 25 B MEDICAL </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 161 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 25 C CHIR </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 177 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2="" tabindex="0" role="listitem" class="v-list-item v-list-item--link theme--light"><div data-v-2c67e4a2="" class="v-list-item__content"><div data-v-2c67e4a2="" class="v-list-item__title font-weight-bold"> 25 C MEDICAL </div><div data-v-2c67e4a2="" class="v-list-item__subtitle text-overline font-weight-bold"> 364 QST </div><div data-v-2c67e4a2="" class="v-list-item__subtitle">  </div></div><div data-v-2c67e4a2="" class="v-list-item__action v-list-item__action--stack" style="display: flex; flex-direction: row;"><!----><div data-v-a1975780="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><button data-v-a1975780="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default"><span class="v-btn__content"><i data-v-a1975780="" aria-hidden="true" class="v-icon notranslate mdi mdi-pin theme--light"></i></span></button><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><!----><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default secondary--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-pencil-circle theme--light"></i></span></button><!----><div data-v-c7d7738a="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><button data-v-c7d7738a="" type="button" class="v-btn v-btn--icon v-btn--plain v-btn--round theme--light v-size--default error--text" role="button" aria-haspopup="true" aria-expanded="false"><span class="v-btn__content"><i data-v-c7d7738a="" aria-hidden="true" class="v-icon notranslate mdi mdi-delete-circle theme--light"></i></span></button><!----><!----></div></div><div data-v-2c67e4a2=""></div><!----></div></div><div data-v-e963c18c="" data-v-2c67e4a2="" class="v-dialog__container"><!----></div><footer data-v-7b8385bd="" data-v-2c67e4a2="" class="v-footer transparent pa-0 mt-16 v-sheet theme--light" data-booted="true"><div data-v-7b8385bd="" class="container" style="display: grid; gap: 6px; place-items: center;"><div data-v-7b8385bd="" class="d-flex flex-wrap" style="gap: 6px; place-items: center; justify-content: center;"><span data-v-7b8385bd=""><a data-v-7b8385bd="" href="/" class="font-weight-bold text-overline text--primary"> Principale </a><i data-v-7b8385bd="" aria-hidden="true" class="v-icon notranslate mdi mdi-circle-small theme--light" style="font-size: 16px;"></i></span><span data-v-7b8385bd=""><a data-v-7b8385bd="" href="/pricing" class="font-weight-bold text-overline text--primary"> Tarifs </a><i data-v-7b8385bd="" aria-hidden="true" class="v-icon notranslate mdi mdi-circle-small theme--light" style="font-size: 16px;"></i></span><span data-v-7b8385bd=""><a data-v-7b8385bd="" href="/faq" class="font-weight-bold text-overline text--primary"> FAQs </a><i data-v-7b8385bd="" aria-hidden="true" class="v-icon notranslate mdi mdi-circle-small theme--light" style="font-size: 16px;"></i></span><span data-v-7b8385bd=""><a data-v-7b8385bd="" href="https://opso.co/blog" class="font-weight-bold text-overline text--primary"> Blog </a><!----></span></div><div data-v-7b8385bd="" style="border-top: 2px var(--v-border-base) solid !important; width: 25%;"></div><div data-v-7b8385bd="" class="text-center"><a data-v-7b8385bd="" href="https://t.me/medlibro_co" target="_blank" class="font-weight-bold text-overline text--primary"> Telegram Channel </a><i data-v-7b8385bd="" aria-hidden="true" class="v-icon notranslate mdi mdi-circle-small theme--light" style="font-size: 16px;"></i><a data-v-7b8385bd="" href="https://t.me/opso_co" target="_blank" class="font-weight-bold text-overline text--primary"> Send Message </a><i data-v-7b8385bd="" aria-hidden="true" class="v-icon notranslate mdi mdi-circle-small theme--light" style="font-size: 16px;"></i><a data-v-7b8385bd="" href="mailto:contact@opso.co" class="font-weight-bold text-overline text--primary"> E-MAIL </a><i data-v-7b8385bd="" aria-hidden="true" class="v-icon notranslate mdi mdi-circle-small theme--light" style="font-size: 16px;"></i><a data-v-7b8385bd="" href="https://x.com/opso_co" target="_blank" class="font-weight-bold text-overline text--primary"> X </a></div><div data-v-7b8385bd="" class="mt-4 text-center text-subtitle-2 text-caption text-primary"> © 2026 <a data-v-7b8385bd="" target="_blank" href="https://opso.co" class="font-weight-bold" style="text-decoration: none !important; color: inherit !important;">OPSO LLC</a>. All rights reserved. </div></div></footer></div></div></main></div></div><div data-v-ea503c67="" class="v-snack v-snack--bottom" style="z-index: 500;"><div class="v-snack__wrapper v-sheet v-sheet--outlined theme--light" style="display: none;"><div role="status" aria-live="polite" class="v-snack__content"><div data-v-ea503c67="" class="d-flex align-center"><i data-v-ea503c67="" aria-hidden="true" class="v-icon notranslate v-icon--left material-icons theme--light"></i><span data-v-ea503c67="" class="font-weight-bold">  </span></div></div><div class="v-snack__action "></div></div></div></div></div>
+	<script defer="" src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;a14009bb8bd742da9a9e742485e824d2&quot;,&quot;server_timing&quot;:{&quot;name&quot;:{&quot;cfCacheStatus&quot;:true,&quot;cfEdge&quot;:true,&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfSpeedBrain&quot;:true},&quot;location_startswith&quot;:null}}" crossorigin="anonymous"></script>
+
+
+</body></html>

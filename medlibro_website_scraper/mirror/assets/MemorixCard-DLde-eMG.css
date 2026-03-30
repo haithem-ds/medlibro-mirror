@@ -1,0 +1,1 @@
+.scoring-grid[data-v-b887fbe0]{display:grid;width:100%;grid-template-columns:repeat(3,1fr);gap:12px}@media (max-width: 599px){.scoring-grid[data-v-b887fbe0]{grid-template-columns:1fr}}.notes-overlay[data-v-b887fbe0]{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--v-background-base, #fff);z-index:1;padding:12px;overflow-y:auto}

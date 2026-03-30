@@ -1,0 +1,1 @@
+import{n}from"./index-AtrV5JHa.js";import{_ as t}from"./VMain-CQOyqd7s.js";import"./vendor-Cv0_FV-r.js";import"./vuetify-B_-uhRm4.js";import"./index-DFuf84FE.js";const e={name:"FocusLayout"};var _=function(){var r=this,o=r._self._c;return o(t,[o("router-view")],1)},s=[],a=n(e,_,s,!1,null,"4cc30b48");const l=a.exports;export{l as default};

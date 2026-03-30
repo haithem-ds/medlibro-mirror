@@ -1,0 +1,1 @@
+import{V as e}from"./vendor-Cv0_FV-r.js";const o=e.extend({name:"v-list-item-icon",functional:!0,render(i,{data:t,children:n}){return t.staticClass=`v-list-item__icon ${t.staticClass||""}`.trim(),i("div",t,n)}});export{o as _};

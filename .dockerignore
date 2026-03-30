@@ -1,0 +1,10 @@
+.git
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+.venv
+venv
+Har files
+**/*.har
+medlibro_website_scraper/mirror_users.json
+medlibro_website_scraper/mirror_sessions.json

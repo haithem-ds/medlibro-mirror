@@ -1,0 +1,1344 @@
+{
+  "pages": [
+    {
+      "file": "favicon.ico.html",
+      "title": "favicon.ico (64×64)",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\ActivityCard-B18LtKtu.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\ActivityCard-D9KizkBW.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\Announcement-CwMF-U1F.svg.html",
+      "title": "Notioly New",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\AnswerDialog-BfjbLpTp.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\AppFooter-CMFRk4Ks.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\AppFooter-D8I-cMwD.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\Archive-Files-BuhedJs-.svg.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\axios--501ovh0.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\Car-Ride-fEn8Kr4L.svg.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\Checking-Notes-DEyvZzCo.svg.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\ClientLayout-C2EYz5yZ.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\ClinicalCaseDialog-F1b_yzFs.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\Clock-Is-Ticking-pS1n0_LF.svg.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\ConfirmationDialog-B5PUl_TJ.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\ContributionImagesSection-D4QWOEvL.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\ContributionImagesSection-D7q9zG_b.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\ContributionQuestionsDialog-ByXiIBLt.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\DashboardPage-BS_VsFsA.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\DefaultLayout-CPp2i_tX.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\ExamPage-B9EekmjJ.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\FAQPage-BR2FfgY-.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\FeaturesSection-C1tdIu2z.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\FeaturesSection-hqCTaU-U.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\FilterForm-D6EDx3Yu.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\FilterForm-emPxWkva.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\highlights-BbN8vXOS.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\HomeButton-B7etD-oA.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\HomePage-DR0aca6t.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\HomePage-DUZR_g_X.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-0wFbg7uQ.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-3FX65K1z.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-AtrV5JHa.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-B8CRZBZt.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-BigGFxva.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-BjaFTGv8.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-BlV-lnsx.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-BrqQVgiC.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-BSaP3Y0g.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-By8NiXQZ.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-BZFamIto.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-C17dsj-d.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-C1pNNSpG.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-Cek1bV66.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-CVVKbSrD.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-Dei0ugVd.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-DFuf84FE.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-DXw70iS9.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-eoxEDGvQ.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-JrUxX5Np.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-KE25yfDr.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-qxqBqTOB.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-sLtnYYr_.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-smeRWBSW.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-yZG_eEIc.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\index-_8ietVvA.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\Learning-nJ6gqSdU.svg.html",
+      "title": "Notioly v2",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\lodash-Do4f-ta7.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\MemorixPage-CEww7Pk7.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\NotFoundPage-NAdOkKpO.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\opso-light-B0mcZpiX.png.html",
+      "title": "opso-light-B0mcZpiX.png (800×800)",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\Painting-qh6UOP4a.svg.html",
+      "title": "Notioly New",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\PlansSection-CT7umuEe.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\PlansSection-Ds77LQOu.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\playlists-CAej7X3U.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\PlaylistsPage-DZg537i-.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\PricingPage-CsusXdJC.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\PrimaryAutocomplete-DfXDmaWG.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\PrimaryAutocomplete-v9ZgN1SP.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\PrioritizerPage-1Q7DgeZE.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\PrioritizerPage-BKGWIU_C.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\Productive-Mood-BvxD2SJy.svg.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\ProfilePage-CJMwJY0h.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\ProfilePage-CppjaCnZ.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\Reporting-Stats-gPJL83nV.svg.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\RevisionPage-VzpB7c58.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\SessionsPage-CywRHnj1.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\Support-24-7-BpQ0xKsu.svg.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\users-CYN_otuP.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\utils-fK4_zk7F.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VAlert-BUQF9xFl.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VAlert-DTkdddwc.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VAppBar-C_aUnkCM.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VAppBar-W5vRt7nm.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VAppBarNavIcon-Bk5Q_hb4.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VAutocomplete-CjTmqqn8.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VAutocomplete-z7NtCVcm.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VAvatar-BMBIDj5h.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VAvatar-BUxYne3p.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VBadge-BBRbYIwu.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VBadge-BWaMeF0p.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VBtn-BIC3VVQ1.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VBtn-Chjflh8x.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VBtnToggle--1fdPxmc.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VBtnToggle-B3wEGKXC.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VCarouselItem-Ba-bHn0G.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VCarouselItem-BwiVHvv1.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VCheckbox-CLRRSaPl.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VCheckbox-C_C39YLQ.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VChip-BGUsr_OG.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VChip-D7W74so1.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VDataTable-BCctScJO.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VDataTable-C6NOyssn.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VDialog-BJolCos7.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VDialog-DkrJy-Kc.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VDivider-B7De1bWx.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VDivider-BB2sgvH5.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\vendor-Cv0_FV-r.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VExpansionPanelHeader-B-4Wu-po.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VExpansionPanelHeader-xA5hd2Yp.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VForm-DwNr0NtU.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VImg-BlhfxeV7.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VImg-Cv3kCZbk.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VInput-BKVUZP9a.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VInput-D-729cEf.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VItemGroup-CnpfATjz.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VItemGroup-CzFvgA87.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VList-By3t70wp.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VList-DnfJ-dOX.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VListItemAction-qHVBtgVx.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VListItemIcon-IjOHk8Pb.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VMain-CQOyqd7s.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VMain-D4N7uXnB.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VMenu-BV9befNV.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VMenu-CAv4e1sw.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VNavigationDrawer-7OAzvkwT.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VNavigationDrawer-DPEBhp88.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VRow-BzW0Wy6i.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VSelect-bKm0rAer.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VSelect-DonCJy8q.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VSimpleTable-CaPkTAsN.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VSimpleTable-CU47C-o2.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VSkeletonLoader-C57Hiyzz.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VSkeletonLoader-CvCJNrHF.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VSpacer-BQJI7pHn.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VSubheader-5mnqoxLb.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VSubheader-DfDaBt4F.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VTabItem-BDlRzVfv.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VTabItem-LHjy5dvl.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VTextarea-CyCP7lga.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VTextarea-De2P0H9n.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VTextField-CT7tgzWX.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VTextField-Dzvgicjj.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\vuetify-B_-uhRm4.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VWindowItem-BcX-Wt0X.css.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\VWindowItem-D2MpPWhK.js.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    },
+    {
+      "file": "assets\\Yeah-kM5Qgoud.svg.html",
+      "title": "No title",
+      "scripts": [],
+      "stylesheets": [],
+      "api_calls": [],
+      "routes": [],
+      "components": []
+    }
+  ],
+  "routes": [],
+  "components": [],
+  "api_endpoints": [],
+  "javascript_frameworks": [
+    "Next.js",
+    "Vue.js",
+    "React"
+  ],
+  "css_frameworks": [
+    "Bootstrap",
+    "Material Design"
+  ],
+  "features": [
+    "User Profile",
+    "Revision/QCM System",
+    "Dashboard"
+  ]
+}

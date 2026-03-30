@@ -1,0 +1,13 @@
+{
+  "users": [
+    {
+      "email": "compte@example.com",
+      "password": "minimum8chars",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "year": "3rd",
+      "gender": "male",
+      "emailVerified": true
+    }
+  ]
+}

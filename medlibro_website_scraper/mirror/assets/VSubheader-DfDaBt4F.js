@@ -1,0 +1,1 @@
+import{r as e,t,g as a}from"./index-AtrV5JHa.js";const i=e(t).extend({name:"v-subheader",props:{inset:Boolean},render(s){return s("div",{staticClass:"v-subheader",class:{"v-subheader--inset":this.inset,...this.themeClasses},attrs:this.$attrs,on:this.$listeners},a(this))}});export{i as _};

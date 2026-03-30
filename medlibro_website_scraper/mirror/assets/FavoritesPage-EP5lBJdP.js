@@ -1,0 +1,1 @@
+import{n as r,e as t}from"./index-AtrV5JHa.js";import"./vendor-Cv0_FV-r.js";import"./vuetify-B_-uhRm4.js";const a={name:"FavoritesPage"};var o=function(){var e=this,n=e._self._c;return n(t,{attrs:{fluid:""}})},s=[],_=r(a,o,s,!1,null,"be3a3e28");const p=_.exports;export{p as default};
