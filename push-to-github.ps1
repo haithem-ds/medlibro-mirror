@@ -36,7 +36,8 @@ if ($token) {
 
 $repo = if ($args.Count -ge 1 -and $args[0]) { $args[0] } else { "medlibro-mirror" }
 
-if (git remote get-url origin 2>$null) {
+cmd /c "git remote get-url origin >nul 2>&1"
+if ($LASTEXITCODE -eq 0) {
     Write-Host "Remote 'origin' already exists. Pushing to existing remote..." -ForegroundColor Yellow
     git push -u origin main
     exit $LASTEXITCODE
