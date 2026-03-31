@@ -8,7 +8,14 @@ This repo is laid out for a **Docker** deploy: `Data/` (question JSON) plus `med
 |----------|---------|-----------------|
 | `MEDLIBRO_DATA_DIR` | Folder with `1st.json`, `2nd.json`, … | Parent `Data/` |
 | `MEDLIBRO_STATE_DIR` | Writable folder for `mirror_users.json` and `mirror_sessions.json` | App folder |
+| `MEDLIBRO_YEAR_KEYS` | Comma‑separated years to load into RAM (e.g. `1st,2nd,3rd,residency`) | **Local:** all years. **Render:** if `RENDER=true` and unset, defaults to `1st,2nd,3rd,residency` to avoid 512MB OOM from huge `4th`/`5th`/`6th` JSON |
 | `PORT` | HTTP port | `8080` (Render sets this automatically) |
+
+Render sets **`RENDER=true`**. The app skips **`4th`**, **`5th`**, and **`6th`** by default so the free tier can stay under ~512MB. To load **all** years, set in the Render dashboard:
+
+`MEDLIBRO_YEAR_KEYS=1st,2nd,3rd,4th,5th,6th,residency`
+
+You may still OOM unless you use a larger instance.
 
 ## GitHub
 

@@ -17,4 +17,5 @@ RUN mkdir -p /data
 EXPOSE 8080
 
 # Render sets PORT; local Docker defaults to 8080
-CMD ["sh", "-c", "exec gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 2 --threads 4 serve_mirror:app"]
+# Single worker: avoids loading the full JSON cache twice (was hitting Render 512MB OOM with --workers 2).
+CMD ["sh", "-c", "exec gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 1 --threads 2 serve_mirror:app"]

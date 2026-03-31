@@ -116,6 +116,28 @@ YEAR_LABELS = {
     "residency": "Résidanat",
 }
 
+
+def active_year_mapping():
+    """
+    Which year JSON files to load into RAM.
+
+    - MEDLIBRO_YEAR_KEYS: comma list (e.g. 1st,2nd,3rd,residency) overrides everything.
+    - On Render (RENDER=true), default skips 4th/5th/6th — those files are huge and often OOM a 512MB instance.
+    - Else: all years in _year_mapping.
+    """
+    explicit = (os.environ.get("MEDLIBRO_YEAR_KEYS") or "").strip()
+    if explicit:
+        allow = {x.strip() for x in explicit.split(",") if x.strip()}
+        m = {k: v for k, v in _year_mapping.items() if k in allow}
+        if not m:
+            print("[WARN] MEDLIBRO_YEAR_KEYS matched no known years; using full year mapping")
+            return dict(_year_mapping)
+        return m
+    if (os.environ.get("RENDER") or "").strip().lower() in ("1", "true", "yes"):
+        slim = ("1st", "2nd", "3rd", "residency")
+        return {k: _year_mapping[k] for k in slim if k in _year_mapping}
+    return dict(_year_mapping)
+
 # Session tokens issued after successful login (prefix must match inline auth script in index.html)
 TOKEN_PREFIX = "mloc_"
 USERS_STORE_PATH = _STATE_DIR / "mirror_users.json"
@@ -385,12 +407,19 @@ def _year_items(year_data):
     return []
 
 def load_data():
-    """Load all JSON data files. Each year can be a list or { year, total, questions: [...] }."""
+    """Load JSON data files for the active year set. Each year can be a list or { year, total, questions: [...] }."""
     global _data_cache
     if _data_cache:
         return _data_cache
-    print(f"[INFO] Loading data from {DATA_DIR}")
-    for year_key, filename in _year_mapping.items():
+    active = active_year_mapping()
+    keys = ", ".join(active.keys())
+    print(f"[INFO] Loading data from {DATA_DIR} (years: {keys})")
+    if (os.environ.get("RENDER") or "").strip().lower() in ("1", "true", "yes") and set(active.keys()) != set(_year_mapping.keys()):
+        print(
+            "[INFO] Skipping 4th/5th/6th on Render by default (memory). "
+            "Add MEDLIBRO_YEAR_KEYS=1st,2nd,3rd,4th,5th,6th,residency in Render to load everything if your plan has enough RAM."
+        )
+    for year_key, filename in active.items():
         filepath = DATA_DIR / filename
         if filepath.exists():
             try:
@@ -795,7 +824,7 @@ def get_years():
     """Get all available years with QST/CC counts for dropdown (e.g. '3ème → 1,152 QST et 594 CC (3,224 QST)')."""
     data = load_data()
     years = []
-    for year_key in _year_mapping.keys():
+    for year_key in active_year_mapping().keys():
         if year_key in data:
             year_data = data[year_key]
             items = _year_items(year_data)
@@ -821,20 +850,15 @@ def get_years():
 @app.route('/api/v1/years/public', methods=['GET'])
 def get_years_public():
     """Signup page: curriculum years with forSale for year dropdown."""
-    data = load_data()
+    # Do not call load_data() here — parsing multi‑GB JSON on signup was OOM‑killing small instances.
     out = []
-    for year_key in _year_mapping.keys():
-        if year_key not in data:
+    for year_key, filename in active_year_mapping().items():
+        if not (DATA_DIR / filename).exists():
             continue
-        items = _year_items(data[year_key])
-        if not items:
-            continue
-        meta0 = items[0].get("meta", items[0]) if items else {}
-        label = meta0.get("year_label") or YEAR_LABELS.get(year_key) or year_key
         out.append({
             "id": year_key,
-            "label": label,
-            "name": meta0.get("year_name", year_key),
+            "label": YEAR_LABELS.get(year_key, year_key),
+            "name": year_key,
             "forSale": True,
         })
     if not out:
