@@ -11,6 +11,8 @@ This repo is laid out for a **Docker** deploy: `Data/` (question JSON) plus `med
 | `MEDLIBRO_YEAR_KEYS` | Comma list of keys to expose (e.g. `1st,2nd,3rd,4th,5th,6th,residency`). **Overrides** default and `MEDLIBRO_ALL_YEARS`. | *(see below)* |
 | `MEDLIBRO_ALL_YEARS` | Set to `1` / `true` to expose **full** curriculum (all keys in code). Ignored if `MEDLIBRO_YEAR_KEYS` is set. | **`0`** (off): default is **1st, 2nd, 3rd, residency** only (4th–6th omitted) for fast `json.load` + LRU on small instances |
 | `MEDLIBRO_PREFER_JSONL` | `1` / `true` if both `.json` and `.jsonl` exist: prefer streaming JSONL (lower peak RAM, slower). | **`0`**: prefer `.json` |
+| `MEDLIBRO_JSON_CACHE_YEARS` | Max number of **full parsed** `.json` roots in RAM (LRU). Default = all active years, capped at **8** (`min(8, n)`). | **8** max fits default 4-year test set so **Revision** stays hot after warm load |
+| `MEDLIBRO_SKIP_JSON_WARMUP` | `1` to skip preloading `.json` at first API init (faster cold boot, slower first **Revision**). | **`0`**: warm cache on startup |
 | `PORT` | HTTP port | `8080` (Render sets this automatically) |
 
 **Default (test):** the API and data layer only include **1er, 2ème, 3ème, Résidanat** — **4th–6th** are excluded so Render-style RAM stays safe and responses stay snappy.
@@ -19,6 +21,8 @@ This repo is laid out for a **Docker** deploy: `Data/` (question JSON) plus `med
 `MEDLIBRO_YEAR_KEYS=1st,2nd,3rd,4th,5th,6th,residency` in the dashboard.
 
 **Optional JSONL:** to serve huge years on tiny RAM, generate `*.jsonl` with `build_jsonl.py` and set `MEDLIBRO_PREFER_JSONL=1`.
+
+**Why Revision felt slow:** with a **single-year** cache, each year kicked the previous one out, so one request re-parsed every file. The server now keeps **several** parsed years (default: all active, max 8) and **warms** them on first API init unless `MEDLIBRO_SKIP_JSON_WARMUP=1`. On full curriculum + small RAM, set `MEDLIBRO_JSON_CACHE_YEARS=1` (old behavior) or use JSONL.
 
 ## GitHub
 

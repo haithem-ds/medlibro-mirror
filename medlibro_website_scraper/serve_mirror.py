@@ -15,6 +15,8 @@ Optional environment (Docker / Render):
   MEDLIBRO_ALL_YEARS   — if 1/true, expose full curriculum (same as all keys).
   Default deploy: 1st, 2nd, 3rd, residency only (4th–6th skipped for small-RAM test hosts).
   MEDLIBRO_PREFER_JSONL — if 1/true, use *.jsonl when both .json and .jsonl exist (slower, lower peak RAM).
+  MEDLIBRO_JSON_CACHE_YEARS — max parsed .json roots kept in RAM (default: all active years, cap 8). Set 1 for minimal RAM.
+  MEDLIBRO_SKIP_JSON_WARMUP — if 1, do not preload .json years at startup (faster boot, slower first revision).
 """
 from pathlib import Path
 import os
@@ -25,7 +27,7 @@ import uuid
 import secrets
 import copy
 import threading
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from datetime import datetime, timezone
 
 try:
@@ -137,8 +139,7 @@ def active_year_mapping():
     - MEDLIBRO_ALL_YEARS=1: full curriculum (same as all keys in _year_mapping).
     - Default (test / free tier): 1st, 2nd, 3rd, residency only (4th–6th omitted).
 
-    Memory: *.json preferred when both .json and .jsonl exist (fast json.load + LRU); set MEDLIBRO_PREFER_JSONL=1
-    to prefer streaming JSONL for huge full-curriculum deploys.
+    Memory: *.json is cached for multiple years (see MEDLIBRO_JSON_CACHE_YEARS); set MEDLIBRO_PREFER_JSONL=1 for JSONL.
     """
     explicit = (os.environ.get("MEDLIBRO_YEAR_KEYS") or "").strip()
     if explicit:
@@ -153,16 +154,23 @@ def active_year_mapping():
     return {k: v for k, v in _year_mapping.items() if k not in _HEAVY_YEAR_KEYS}
 
 
-# At most one parsed year stays in RAM; enough for ~512MB Render + all curriculum files on disk.
+# Parsed .json roots: year_key -> object graph. Multi-slot LRU so /revision can hit all test years without re-parse.
 _year_data_lock = threading.Lock()
-_year_lru_key = None
-_year_lru_data = None
+_year_json_cache: OrderedDict = OrderedDict()
 _year_load_logged = set()
 
 
+def _year_json_cache_capacity():
+    """How many full JSON roots to keep in RAM. Default fits all active keys (max 8); lower for huge full-curriculum deploys."""
+    ex = (os.environ.get("MEDLIBRO_JSON_CACHE_YEARS") or "").strip()
+    if ex.isdigit():
+        return max(1, int(ex))
+    n = len(active_year_mapping())
+    return min(8, max(1, n))
+
+
 def _get_year_parsed_lru(year_key):
-    """Parse one year JSON; evict any previously cached year (low-memory tier)."""
-    global _year_lru_key, _year_lru_data
+    """Parse one year JSON and store in an LRU shared across years (so revision iterates stay hot)."""
     mapping = active_year_mapping()
     filename = mapping.get(year_key)
     if not filename:
@@ -170,23 +178,41 @@ def _get_year_parsed_lru(year_key):
     filepath = DATA_DIR / filename
     if not filepath.exists():
         raise KeyError(year_key)
+    cap = _year_json_cache_capacity()
     with _year_data_lock:
-        if _year_lru_key == year_key and _year_lru_data is not None:
-            return _year_lru_data
-        _year_lru_key = year_key
-        _year_lru_data = None
+        if year_key in _year_json_cache:
+            _year_json_cache.move_to_end(year_key)
+            return _year_json_cache[year_key]
+        while len(_year_json_cache) >= cap:
+            _year_json_cache.popitem(last=False)
         try:
             with open(filepath, "r", encoding="utf-8") as f:
-                _year_lru_data = json.load(f)
+                parsed = json.load(f)
         except Exception as e:
-            _year_lru_key, _year_lru_data = None, None
             print(f"[ERROR] Failed to load {filename}: {e}")
             raise
+        _year_json_cache[year_key] = parsed
         if filename not in _year_load_logged:
             _year_load_logged.add(filename)
-            items = _year_items(_year_lru_data)
-            print(f"[OK] Loaded (cached 1yr) {filename}: {len(items)} items")
-        return _year_lru_data
+            items = _year_items(parsed)
+            print(
+                f"[OK] Loaded {filename}: {len(items)} items (json cache {len(_year_json_cache)}/{cap} years)"
+            )
+        return parsed
+
+
+def _warm_year_json_cache():
+    """Preload each year’s .json so first /revision is fast (no-op for JSONL-only or if skipped)."""
+    if _env_truthy("MEDLIBRO_SKIP_JSON_WARMUP") or _env_truthy("MEDLIBRO_PREFER_JSONL"):
+        return
+    for yk in list(active_year_mapping().keys()):
+        kind, _ = _year_resolve_paths(yk)
+        if kind != "json":
+            continue
+        try:
+            _get_year_parsed_lru(yk)
+        except Exception as ex:
+            print(f"[WARN] JSON warm skipped for {yk}: {ex}")
 
 
 def _year_resolve_paths(year_key):
@@ -568,16 +594,21 @@ _load_data_logged = False
 
 
 def load_data():
-    """Return the lazy year view: one parsed JSON per access, LRU eviction (never bulk-load all years)."""
+    """Return the lazy year view; parsed .json years stay in a multi-entry cache (see MEDLIBRO_JSON_CACHE_YEARS)."""
     global _load_data_logged
     if not _load_data_logged:
         keys = ", ".join(active_year_mapping().keys())
-        print(f"[INFO] Question data: {DATA_DIR} (years: {keys}; prefer *.json + LRU unless MEDLIBRO_PREFER_JSONL=1)")
+        cap = _year_json_cache_capacity()
+        print(
+            f"[INFO] Question data: {DATA_DIR} (years: {keys}; json cache up to {cap} years; "
+            f"prefer .json unless MEDLIBRO_PREFER_JSONL=1)"
+        )
+        _warm_year_json_cache()
         _load_data_logged = True
     return _DATASET_SINGLETON
 
 def find_question_by_id(question_id):
-    """Find a question by ID across all years (one year loaded in RAM at a time)."""
+    """Find a question by ID across all years (uses json cache / LRU)."""
     data = load_data()
     for year_key in data.keys():
         for item in _year_items(data[year_key]):
