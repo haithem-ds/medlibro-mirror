@@ -808,6 +808,9 @@ def get_years():
                     "id": year_key,
                     "label": label,
                     "name": meta.get('year_name', year_key),
+                    # Some UI code (e.g. signup) filters years by `forSale`.
+                    # Always include it so the dropdown never becomes empty if it hits /years instead of /years/public.
+                    "forSale": True,
                     "questionsCount": q_st,
                     "clinicalCasesCount": cc_n,
                     "clinicalCasesQuestionsCount": cc_q,
