@@ -6,19 +6,19 @@ This repo is laid out for a **Docker** deploy: `Data/` (question JSON) plus `med
 
 | Variable | Purpose | Default (local) |
 |----------|---------|-----------------|
-| `MEDLIBRO_DATA_DIR` | Folder with curriculum files: **`*.jsonl` preferred** (one question JSON per line), else `*.json` | Parent `Data/` |
+| `MEDLIBRO_DATA_DIR` | Folder with `1st.json`, … (and optional `*.jsonl`) | `/app/Data` in Docker |
 | `MEDLIBRO_STATE_DIR` | Writable folder for `mirror_users.json` and `mirror_sessions.json` | App folder |
-| `MEDLIBRO_YEAR_KEYS` | Optional comma‑separated subset of curriculum keys exposed in the API (e.g. `1st,2nd,3rd`). Omit for **all** years present under `MEDLIBRO_DATA_DIR`. | All keys in `serve_mirror.py` whose `*.jsonl` or `*.json` exists in the data dir |
+| `MEDLIBRO_YEAR_KEYS` | Comma list of keys to expose (e.g. `1st,2nd,3rd,4th,5th,6th,residency`). **Overrides** default and `MEDLIBRO_ALL_YEARS`. | *(see below)* |
+| `MEDLIBRO_ALL_YEARS` | Set to `1` / `true` to expose **full** curriculum (all keys in code). Ignored if `MEDLIBRO_YEAR_KEYS` is set. | **`0`** (off): default is **1st–4th only** (5th, 6th, résidanat omitted) for fast `json.load` + LRU on small instances |
+| `MEDLIBRO_PREFER_JSONL` | `1` / `true` if both `.json` and `.jsonl` exist: prefer streaming JSONL (lower peak RAM, slower). | **`0`**: prefer `.json` |
 | `PORT` | HTTP port | `8080` (Render sets this automatically) |
 
-**Memory (Render 512MB):** the Docker build runs `build_jsonl.py`: it streams each `*.json` to `*.jsonl` with **ijson** (low RAM at build), then **removes** the original `.json`. At runtime the server reads **one line / one question at a time**, so it never runs `json.load()` on a multi‑GB file. If only `.json` files are present (local dev without conversion), at most **one** full year is parsed (LRU). You can still OOM if an endpoint materializes a **huge** list (e.g. unfiltered revision/session edges); use filters or a larger plan if that happens.
+**Default (test):** the API and data layer only include **1st, 2nd, 3rd, 4ème** — heavy packs (**5th, 6th, residency**) are excluded so Render-style RAM stays safe and responses stay snappy.
 
-Local one-off conversion (optional, if not using Docker):
+**Full curriculum:** set either `MEDLIBRO_ALL_YEARS=1` or  
+`MEDLIBRO_YEAR_KEYS=1st,2nd,3rd,4th,5th,6th,residency` in the dashboard.
 
-```powershell
-pip install ijson
-python medlibro_website_scraper/build_jsonl.py --data-dir Data
-```
+**Optional JSONL:** to serve huge years on tiny RAM, generate `*.jsonl` with `build_jsonl.py` and set `MEDLIBRO_PREFER_JSONL=1`.
 
 ## GitHub
 

@@ -11,8 +11,10 @@ Optional environment (Docker / Render):
   MEDLIBRO_STATE_DIR  — writable dir for mirror_users.json & mirror_sessions.json (default: this package dir)
   PORT                — HTTP port for `python serve_mirror.py` (default: 8080; Render sets this for gunicorn)
 
-  Per-year *.jsonl (one question JSON per line) is preferred when present: same stem as *.json (e.g. 6th.jsonl).
-  Use build_jsonl.py to generate; Docker image build runs it so Render never loads multi‑GB json.load() at runtime.
+  MEDLIBRO_YEAR_KEYS   — comma list overrides year set (e.g. all years for production tests).
+  MEDLIBRO_ALL_YEARS   — if 1/true, expose full curriculum (same as all keys).
+  Default deploy: 1st–4th only (5th, 6th, residency skipped for small-RAM test hosts).
+  MEDLIBRO_PREFER_JSONL — if 1/true, use *.jsonl when both .json and .jsonl exist (slower, lower peak RAM).
 """
 from pathlib import Path
 import os
@@ -118,15 +120,25 @@ YEAR_LABELS = {
     "residency": "Résidanat",
 }
 
+# Heavy curriculum files (OOM on small hosts when all years use json.load). Excluded from default test deploy.
+_HEAVY_YEAR_KEYS = frozenset({"5th", "6th", "residency"})
+
+
+def _env_truthy(name: str) -> bool:
+    v = (os.environ.get(name) or "").strip().lower()
+    return v in ("1", "true", "yes", "on")
+
 
 def active_year_mapping():
     """
-    Which year JSON files exist on disk for this deployment.
+    Which year keys are exposed for this deployment (API + data paths).
 
-    - MEDLIBRO_YEAR_KEYS: optional comma list (e.g. 1st,2nd,3rd) to load a subset only.
-    - Default: all keys in _year_mapping.
+    - MEDLIBRO_YEAR_KEYS: explicit comma list (e.g. 1st,2nd,3rd,4th,5th,6th,residency) wins if set.
+    - MEDLIBRO_ALL_YEARS=1: full curriculum (same as all keys in _year_mapping).
+    - Default (test / free tier): 1st–4th only (5th, 6th, residency omitted).
 
-    Memory: *.jsonl streams one question at a time; *.json uses at most one parsed year (LRU).
+    Memory: *.json preferred when both .json and .jsonl exist (fast json.load + LRU); set MEDLIBRO_PREFER_JSONL=1
+    to prefer streaming JSONL for huge full-curriculum deploys.
     """
     explicit = (os.environ.get("MEDLIBRO_YEAR_KEYS") or "").strip()
     if explicit:
@@ -136,7 +148,9 @@ def active_year_mapping():
             print("[WARN] MEDLIBRO_YEAR_KEYS matched no known years; using full year mapping")
             return dict(_year_mapping)
         return m
-    return dict(_year_mapping)
+    if _env_truthy("MEDLIBRO_ALL_YEARS"):
+        return dict(_year_mapping)
+    return {k: v for k, v in _year_mapping.items() if k not in _HEAVY_YEAR_KEYS}
 
 
 # At most one parsed year stays in RAM; enough for ~512MB Render + all curriculum files on disk.
@@ -176,7 +190,7 @@ def _get_year_parsed_lru(year_key):
 
 
 def _year_resolve_paths(year_key):
-    """Return ('jsonl', path) if a line-delimited file exists, else ('json', path), else (None, None)."""
+    """Return ('json', path) or ('jsonl', path) or (None, None). Prefer .json for LRU speed unless MEDLIBRO_PREFER_JSONL=1."""
     m = active_year_mapping()
     fn = m.get(year_key)
     if not fn:
@@ -184,10 +198,17 @@ def _year_resolve_paths(year_key):
     stem = Path(fn).stem
     jsonl = DATA_DIR / f"{stem}.jsonl"
     jsonp = DATA_DIR / fn
-    if jsonl.is_file():
-        return "jsonl", jsonl
-    if jsonp.is_file():
-        return "json", jsonp
+    prefer_jsonl = _env_truthy("MEDLIBRO_PREFER_JSONL")
+    if prefer_jsonl:
+        if jsonl.is_file():
+            return "jsonl", jsonl
+        if jsonp.is_file():
+            return "json", jsonp
+    else:
+        if jsonp.is_file():
+            return "json", jsonp
+        if jsonl.is_file():
+            return "jsonl", jsonl
     return None, None
 
 
@@ -551,7 +572,7 @@ def load_data():
     global _load_data_logged
     if not _load_data_logged:
         keys = ", ".join(active_year_mapping().keys())
-        print(f"[INFO] Question data: {DATA_DIR} (years: {keys}; prefer *.jsonl else one .json in RAM)")
+        print(f"[INFO] Question data: {DATA_DIR} (years: {keys}; prefer *.json + LRU unless MEDLIBRO_PREFER_JSONL=1)")
         _load_data_logged = True
     return _DATASET_SINGLETON
 
