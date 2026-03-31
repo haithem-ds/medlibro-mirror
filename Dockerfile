@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY medlibro_website_scraper/ .
 
-# Default image: ship *.json for 1st–4th (see active_year_mapping); json.load + LRU is fast for tests.
+# Default image: ship *.json for 1st, 2nd, 3rd, residency (see active_year_mapping); json.load + LRU is fast for tests.
 # For full curriculum on tiny RAM, build JSONL locally and set MEDLIBRO_PREFER_JSONL=1, or use build_jsonl in CI without --drop-json.
 
 RUN mkdir -p /data

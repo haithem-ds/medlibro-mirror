@@ -13,7 +13,7 @@ Optional environment (Docker / Render):
 
   MEDLIBRO_YEAR_KEYS   — comma list overrides year set (e.g. all years for production tests).
   MEDLIBRO_ALL_YEARS   — if 1/true, expose full curriculum (same as all keys).
-  Default deploy: 1st–4th only (5th, 6th, residency skipped for small-RAM test hosts).
+  Default deploy: 1st, 2nd, 3rd, residency only (4th–6th skipped for small-RAM test hosts).
   MEDLIBRO_PREFER_JSONL — if 1/true, use *.jsonl when both .json and .jsonl exist (slower, lower peak RAM).
 """
 from pathlib import Path
@@ -120,8 +120,8 @@ YEAR_LABELS = {
     "residency": "Résidanat",
 }
 
-# Heavy curriculum files (OOM on small hosts when all years use json.load). Excluded from default test deploy.
-_HEAVY_YEAR_KEYS = frozenset({"5th", "6th", "residency"})
+# Excluded from default test deploy (4th–6th are the heavy externat years for many mirrors).
+_HEAVY_YEAR_KEYS = frozenset({"4th", "5th", "6th"})
 
 
 def _env_truthy(name: str) -> bool:
@@ -135,7 +135,7 @@ def active_year_mapping():
 
     - MEDLIBRO_YEAR_KEYS: explicit comma list (e.g. 1st,2nd,3rd,4th,5th,6th,residency) wins if set.
     - MEDLIBRO_ALL_YEARS=1: full curriculum (same as all keys in _year_mapping).
-    - Default (test / free tier): 1st–4th only (5th, 6th, residency omitted).
+    - Default (test / free tier): 1st, 2nd, 3rd, residency only (4th–6th omitted).
 
     Memory: *.json preferred when both .json and .jsonl exist (fast json.load + LRU); set MEDLIBRO_PREFER_JSONL=1
     to prefer streaming JSONL for huge full-curriculum deploys.
