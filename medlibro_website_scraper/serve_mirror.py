@@ -19,6 +19,7 @@ import json
 import uuid
 import secrets
 import copy
+import threading
 from collections import defaultdict
 from datetime import datetime, timezone
 
@@ -94,8 +95,6 @@ def _ensure_user_role(response):
         pass
     return response
 
-# Cache for loaded data
-_data_cache = {}
 _year_mapping = {
     "1st": "1st.json",
     "2nd": "2nd.json",
@@ -119,11 +118,12 @@ YEAR_LABELS = {
 
 def active_year_mapping():
     """
-    Which year JSON files to load into RAM.
+    Which year JSON files exist on disk for this deployment.
 
-    - MEDLIBRO_YEAR_KEYS: comma list (e.g. 1st,2nd,3rd,residency) overrides everything.
-    - On Render (RENDER=true), default skips 4th/5th/6th — those files are huge and often OOM a 512MB instance.
-    - Else: all years in _year_mapping.
+    - MEDLIBRO_YEAR_KEYS: optional comma list (e.g. 1st,2nd,3rd) to load a subset only.
+    - Default: all keys in _year_mapping.
+
+    Memory: only one full year JSON is kept in RAM at a time (see _get_year_parsed_lru).
     """
     explicit = (os.environ.get("MEDLIBRO_YEAR_KEYS") or "").strip()
     if explicit:
@@ -133,10 +133,70 @@ def active_year_mapping():
             print("[WARN] MEDLIBRO_YEAR_KEYS matched no known years; using full year mapping")
             return dict(_year_mapping)
         return m
-    if (os.environ.get("RENDER") or "").strip().lower() in ("1", "true", "yes"):
-        slim = ("1st", "2nd", "3rd", "residency")
-        return {k: _year_mapping[k] for k in slim if k in _year_mapping}
     return dict(_year_mapping)
+
+
+# At most one parsed year stays in RAM; enough for ~512MB Render + all curriculum files on disk.
+_year_data_lock = threading.Lock()
+_year_lru_key = None
+_year_lru_data = None
+_year_load_logged = set()
+
+
+def _get_year_parsed_lru(year_key):
+    """Parse one year JSON; evict any previously cached year (low-memory tier)."""
+    global _year_lru_key, _year_lru_data
+    mapping = active_year_mapping()
+    filename = mapping.get(year_key)
+    if not filename:
+        raise KeyError(year_key)
+    filepath = DATA_DIR / filename
+    if not filepath.exists():
+        raise KeyError(year_key)
+    with _year_data_lock:
+        if _year_lru_key == year_key and _year_lru_data is not None:
+            return _year_lru_data
+        _year_lru_key = year_key
+        _year_lru_data = None
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                _year_lru_data = json.load(f)
+        except Exception as e:
+            _year_lru_key, _year_lru_data = None, None
+            print(f"[ERROR] Failed to load {filename}: {e}")
+            raise
+        if filename not in _year_load_logged:
+            _year_load_logged.add(filename)
+            items = _year_items(_year_lru_data)
+            print(f"[OK] Loaded (cached 1yr) {filename}: {len(items)} items")
+        return _year_lru_data
+
+
+class _YearDatasetView:
+    """Mapping year_key -> parsed JSON; loads one year at a time (LRU 1)."""
+
+    def keys(self):
+        m = active_year_mapping()
+        return [k for k, fn in m.items() if (DATA_DIR / fn).exists()]
+
+    def __contains__(self, year_key):
+        m = active_year_mapping()
+        fn = m.get(year_key)
+        return bool(fn and (DATA_DIR / fn).exists())
+
+    def __getitem__(self, year_key):
+        return _get_year_parsed_lru(year_key)
+
+    def items(self):
+        for k in self.keys():
+            yield k, self[k]
+
+    def values(self):
+        for k in self.keys():
+            yield self[k]
+
+
+_DATASET_SINGLETON = _YearDatasetView()
 
 # Session tokens issued after successful login (prefix must match inline auth script in index.html)
 TOKEN_PREFIX = "mloc_"
@@ -406,41 +466,24 @@ def _year_items(year_data):
         return year_data["questions"]
     return []
 
+_load_data_logged = False
+
+
 def load_data():
-    """Load JSON data files for the active year set. Each year can be a list or { year, total, questions: [...] }."""
-    global _data_cache
-    if _data_cache:
-        return _data_cache
-    active = active_year_mapping()
-    keys = ", ".join(active.keys())
-    print(f"[INFO] Loading data from {DATA_DIR} (years: {keys})")
-    if (os.environ.get("RENDER") or "").strip().lower() in ("1", "true", "yes") and set(active.keys()) != set(_year_mapping.keys()):
-        print(
-            "[INFO] Skipping 4th/5th/6th on Render by default (memory). "
-            "Add MEDLIBRO_YEAR_KEYS=1st,2nd,3rd,4th,5th,6th,residency in Render to load everything if your plan has enough RAM."
-        )
-    for year_key, filename in active.items():
-        filepath = DATA_DIR / filename
-        if filepath.exists():
-            try:
-                with open(filepath, 'r', encoding='utf-8') as f:
-                    raw = json.load(f)
-                _data_cache[year_key] = raw
-                items = _year_items(raw)
-                print(f"[OK] Loaded {filename}: {len(items)} items")
-            except Exception as e:
-                print(f"[ERROR] Failed to load {filename}: {e}")
-        else:
-            print(f"[WARN] File not found: {filename}")
-    return _data_cache
+    """Return the lazy year view: one parsed JSON per access, LRU eviction (never bulk-load all years)."""
+    global _load_data_logged
+    if not _load_data_logged:
+        keys = ", ".join(active_year_mapping().keys())
+        print(f"[INFO] Question data: {DATA_DIR} (years: {keys}; at most one year JSON in RAM)")
+        _load_data_logged = True
+    return _DATASET_SINGLETON
 
 def find_question_by_id(question_id):
-    """Find a question by ID across all years."""
+    """Find a question by ID across all years (one year loaded in RAM at a time)."""
     data = load_data()
-    for year_data in data.values():
-        for item in _year_items(year_data):
+    for year_key in data.keys():
+        for item in _year_items(data[year_key]):
             if isinstance(item, dict):
-                # Support both flat item and nested item.question
                 q = item.get("question", item)
                 rid = item.get('id') or q.get('id') or item.get('questionId') or q.get('questionId') or item.get('_id')
                 if rid == question_id:
@@ -475,25 +518,35 @@ def _clinical_case_id(item):
     return s if s else None
 
 
+def _qst_cc_acc_new():
+    return {"standalone": 0, "cc_ids": set(), "cc_q_rows": 0}
+
+
+def _qst_cc_acc_add(acc, item):
+    if not isinstance(item, dict):
+        return
+    cid = _clinical_case_id(item)
+    if cid:
+        acc["cc_ids"].add(cid)
+        acc["cc_q_rows"] += 1
+    else:
+        acc["standalone"] += 1
+
+
+def _qst_cc_acc_totals(acc):
+    return acc["standalone"], len(acc["cc_ids"]), acc["cc_q_rows"]
+
+
 def _count_qst_cc_from_items(items):
     """
     Counts for FilterForm formatStats (mirror assets FilterField.formatStats):
     questionsCount → standalone QST; clinicalCasesCount → distinct CC;
     clinicalCasesQuestionsCount → QST rows that belong to a CC (parenthetical).
     """
-    standalone = 0
-    cc_ids = set()
-    cc_q_rows = 0
+    acc = _qst_cc_acc_new()
     for item in items or []:
-        if not isinstance(item, dict):
-            continue
-        cid = _clinical_case_id(item)
-        if cid:
-            cc_ids.add(cid)
-            cc_q_rows += 1
-        else:
-            standalone += 1
-    return standalone, len(cc_ids), cc_q_rows
+        _qst_cc_acc_add(acc, item)
+    return _qst_cc_acc_totals(acc)
 
 
 # ============================================================================
@@ -806,7 +859,7 @@ def get_questions_count():
 def get_v2_sources_count():
     """V2 API: sources count."""
     data = load_data()
-    total = sum(len(v) if isinstance(v, list) else 0 for v in data.values())
+    total = sum(len(_year_items(v)) for v in data.values())
     return jsonify(total)
 
 @app.route('/api/v2/sources/latest', methods=['GET'])
@@ -921,11 +974,11 @@ def _chapters_for_request():
                 continue
             cid = ch_uuid or (ch_title.lower().replace(" ", "_").replace("'", "")[:50] if ch_title else "chapter")
             if cid not in chapters_map:
-                chapters_map[cid] = {"title": ch_title or "", "items": []}
-            chapters_map[cid]["items"].append(item)
+                chapters_map[cid] = {"title": ch_title or "", "acc": _qst_cc_acc_new()}
+            _qst_cc_acc_add(chapters_map[cid]["acc"], item)
     result = []
     for cid, info in sorted(chapters_map.items(), key=lambda x: (x[1]["title"] or "")):
-        q_st, cc_n, cc_q = _count_qst_cc_from_items(info["items"])
+        q_st, cc_n, cc_q = _qst_cc_acc_totals(info["acc"])
         result.append({
             "id": cid,
             "title": info["title"],
@@ -961,8 +1014,8 @@ def _themes_for_request():
             theme_uuid = meta.get("themeId")
             tid = theme_uuid or (theme_name.lower().replace(" ", "_").replace("'", ""))
             if tid not in seen:
-                seen[tid] = {"name": theme_name, "questions": [], "chapters": set()}
-            seen[tid]["questions"].append(item)
+                seen[tid] = {"name": theme_name, "acc": _qst_cc_acc_new(), "chapters": set()}
+            _qst_cc_acc_add(seen[tid]["acc"], item)
             ch = meta.get("chapter") or meta.get("chapter_label")
             if ch:
                 seen[tid]["chapters"].add(ch)
@@ -970,7 +1023,7 @@ def _themes_for_request():
             break
     result = []
     for tid, info in sorted(seen.items(), key=lambda x: (x[1]["name"] or "")):
-        q_st, cc_n, cc_q = _count_qst_cc_from_items(info["questions"])
+        q_st, cc_n, cc_q = _qst_cc_acc_totals(info["acc"])
         result.append({
             "id": tid,
             "name": info["name"],
@@ -1055,11 +1108,11 @@ def _courses_for_request():
                 continue
             cid = course_uuid or (course_title.lower().replace(" ", "_").replace("'", "")[:50] if course_title else "course")
             if cid not in courses_map:
-                courses_map[cid] = {"title": course_title or "Cours", "items": []}
-            courses_map[cid]["items"].append(item)
+                courses_map[cid] = {"title": course_title or "Cours", "acc": _qst_cc_acc_new()}
+            _qst_cc_acc_add(courses_map[cid]["acc"], item)
     result = []
     for cid, info in sorted(courses_map.items(), key=lambda x: (x[1]["title"] or "")):
-        q_st, cc_n, cc_q = _count_qst_cc_from_items(info["items"])
+        q_st, cc_n, cc_q = _qst_cc_acc_totals(info["acc"])
         result.append({
             "id": cid,
             "title": info["title"],
@@ -1087,11 +1140,11 @@ def _courses_for_request():
                     continue
                 cid = course_uuid or (course_title.lower().replace(" ", "_").replace("'", "")[:50] if course_title else "course")
                 if cid not in courses_map:
-                    courses_map[cid] = {"title": course_title or "Cours", "items": []}
-                courses_map[cid]["items"].append(item)
+                    courses_map[cid] = {"title": course_title or "Cours", "acc": _qst_cc_acc_new()}
+                _qst_cc_acc_add(courses_map[cid]["acc"], item)
         result = []
         for cid, info in sorted(courses_map.items(), key=lambda x: (x[1]["title"] or "")):
-            q_st, cc_n, cc_q = _count_qst_cc_from_items(info["items"])
+            q_st, cc_n, cc_q = _qst_cc_acc_totals(info["acc"])
             result.append({
                 "id": cid,
                 "title": info["title"],
@@ -1117,11 +1170,11 @@ def _courses_for_request():
                     continue
                 cid = course_uuid or (course_title.lower().replace(" ", "_").replace("'", "")[:50] if course_title else "course")
                 if cid not in courses_map:
-                    courses_map[cid] = {"title": course_title or "Cours", "items": []}
-                courses_map[cid]["items"].append(item)
+                    courses_map[cid] = {"title": course_title or "Cours", "acc": _qst_cc_acc_new()}
+                _qst_cc_acc_add(courses_map[cid]["acc"], item)
         result = []
         for cid, info in sorted(courses_map.items(), key=lambda x: (x[1]["title"] or "")):
-            q_st, cc_n, cc_q = _count_qst_cc_from_items(info["items"])
+            q_st, cc_n, cc_q = _qst_cc_acc_totals(info["acc"])
             result.append({
                 "id": cid,
                 "title": info["title"],
@@ -1158,7 +1211,7 @@ def _sources_with_counts(year_label, total_q, total_cc=0, total_cc_q=0):
 def get_sources_by_theme(theme_id):
     """Exam/Revision: sources per theme from meta.sourcesYears (exam years) for questions in this theme."""
     data = load_data()
-    year_buckets = defaultdict(list)
+    year_buckets = defaultdict(_qst_cc_acc_new)
     for year_key, year_data in data.items():
         items = _year_items(year_data)
         if not items:
@@ -1170,10 +1223,10 @@ def get_sources_by_theme(theme_id):
             if not _theme_matches(meta, theme_id):
                 continue
             for yr in meta.get("sourcesYears") or []:
-                year_buckets[yr].append(item)
+                _qst_cc_acc_add(year_buckets[yr], item)
     result = []
     for yr in sorted(year_buckets.keys(), reverse=True):
-        q_st, cc_n, cc_q = _count_qst_cc_from_items(year_buckets[yr])
+        q_st, cc_n, cc_q = _qst_cc_acc_totals(year_buckets[yr])
         result.append({
             "id": f"source-{yr}",
             "year": str(yr),
@@ -1193,7 +1246,7 @@ def post_sources():
     """FilterForm fetchSources: return sources from meta.sourcesYears (exam years 2018, 2017, ...) like real MedLibro."""
     data = load_data()
     # Bucket question rows per exam year from meta.sourcesYears (real MedLibro structure)
-    year_buckets = defaultdict(list)
+    year_buckets = defaultdict(_qst_cc_acc_new)
     for year_key, year_data in data.items():
         items = _year_items(year_data)
         if not items:
@@ -1205,11 +1258,11 @@ def post_sources():
             years = meta.get("sourcesYears") or []
             if isinstance(years, list):
                 for yr in years:
-                    year_buckets[yr].append(item)
+                    _qst_cc_acc_add(year_buckets[yr], item)
     # One source per exam year, sorted descending (2022, 2021, 2018, ...)
     result = []
     for yr in sorted(year_buckets.keys(), reverse=True):
-        q_st, cc_n, cc_q = _count_qst_cc_from_items(year_buckets[yr])
+        q_st, cc_n, cc_q = _qst_cc_acc_totals(year_buckets[yr])
         result.append({
             "id": f"source-{yr}",
             "year": str(yr),
@@ -1328,12 +1381,12 @@ def get_revision():
             theme_uuid = meta.get("themeId")
             tid = theme_uuid or (theme_name.lower().replace(" ", "_").replace("'", ""))
             if tid not in themes_dict:
-                themes_dict[tid] = {"name": theme_name, "chapters": set(), "questions": []}
+                themes_dict[tid] = {"name": theme_name, "chapters": set(), "acc": _qst_cc_acc_new()}
             themes_dict[tid]["chapters"].add(meta.get("chapter") or meta.get("chapter_label") or "")
-            themes_dict[tid]["questions"].append(item)
+            _qst_cc_acc_add(themes_dict[tid]["acc"], item)
         themes = []
         for tid, theme_data in sorted(themes_dict.items(), key=lambda x: x[1]["name"] or ""):
-            q_st, cc_n, cc_q = _count_qst_cc_from_items(theme_data["questions"])
+            q_st, cc_n, cc_q = _qst_cc_acc_totals(theme_data["acc"])
             themes.append({
                 "id": tid,
                 "name": theme_data["name"],
@@ -1750,14 +1803,13 @@ def get_cards_themes_top():
         items = _year_items(year_data)
         if not items:
             continue
-        themes_dict = defaultdict(list)
+        themes_counts = defaultdict(int)
         for item in items:
             if isinstance(item, dict) and _question_in_memorix_queue(item):
                 meta = item.get("meta", item)
                 theme = meta.get("theme", meta.get("theme_label", "Unknown"))
-                themes_dict[theme].append(item)
-        for theme_name, theme_items in themes_dict.items():
-            n = len(theme_items)
+                themes_counts[theme] += 1
+        for theme_name, n in themes_counts.items():
             themes.append({
                 "id": _theme_name_to_slug(theme_name),
                 "name": theme_name,
@@ -1797,13 +1849,16 @@ SAMPLE_SESSIONS = [
 ]
 
 
-def _all_question_raw_items_ordered():
+def _all_question_raw_items_ordered(limit=None):
+    """Collect question rows in curriculum order; stop once `limit` items found (avoid OOM on huge corpora)."""
     data = load_data()
     flat = []
     for year_key in sorted(data.keys()):
         for item in _year_items(data[year_key]):
             if isinstance(item, dict) and _question_id(item):
                 flat.append(item)
+                if limit is not None and len(flat) >= limit:
+                    return flat
     return flat
 
 
@@ -1881,14 +1936,14 @@ def _session_raw_items(session_id):
                         seen.append(item)
             if seen:
                 return seen
-        return _all_question_raw_items_ordered()[:200]
+        return _all_question_raw_items_ordered(200)
     if session_id == "sample-session-1":
-        return _all_question_raw_items_ordered()[:42]
+        return _all_question_raw_items_ordered(42)
     if session_id == "sample-session-2":
-        return _all_question_raw_items_ordered()[:25]
+        return _all_question_raw_items_ordered(25)
     if session_id not in sample_ids:
         return []
-    return _all_question_raw_items_ordered()[:50]
+    return _all_question_raw_items_ordered(50)
 
 
 def _session_question_payload(raw):
@@ -2167,21 +2222,21 @@ def _memorix_due_themes():
         items = _year_items(year_data)
         if not items:
             continue
-        themes_dict = defaultdict(list)
+        themes_counts = defaultdict(int)
         for item in items:
             if isinstance(item, dict) and _question_in_memorix_queue(item):
                 meta = item.get("meta", item)
                 theme = meta.get("theme", meta.get("theme_label", "Unknown"))
-                themes_dict[theme].append(item)
+                themes_counts[theme] += 1
         year_label = year_key  # e.g. "1st", "2nd"
         rows = [
             {
                 "id": _theme_name_to_slug(theme_name),
                 "name": theme_name,
-                "count": str(len(theme_items)),
+                "count": str(n),
                 "yearLabel": year_label,
             }
-            for theme_name, theme_items in themes_dict.items()
+            for theme_name, n in sorted(themes_counts.items(), key=lambda x: (x[0] or ""))
         ]
         if rows:
             result[year_label] = rows
