@@ -10,6 +10,9 @@ Optional environment (Docker / Render):
   MEDLIBRO_DATA_DIR   — path to folder with 1st.json, 2nd.json, … (default: ../Data)
   MEDLIBRO_STATE_DIR  — writable dir for mirror_users.json & mirror_sessions.json (default: this package dir)
   PORT                — HTTP port for `python serve_mirror.py` (default: 8080; Render sets this for gunicorn)
+
+  Per-year *.jsonl (one question JSON per line) is preferred when present: same stem as *.json (e.g. 6th.jsonl).
+  Use build_jsonl.py to generate; Docker image build runs it so Render never loads multi‑GB json.load() at runtime.
 """
 from pathlib import Path
 import os
@@ -123,7 +126,7 @@ def active_year_mapping():
     - MEDLIBRO_YEAR_KEYS: optional comma list (e.g. 1st,2nd,3rd) to load a subset only.
     - Default: all keys in _year_mapping.
 
-    Memory: only one full year JSON is kept in RAM at a time (see _get_year_parsed_lru).
+    Memory: *.jsonl streams one question at a time; *.json uses at most one parsed year (LRU).
     """
     explicit = (os.environ.get("MEDLIBRO_YEAR_KEYS") or "").strip()
     if explicit:
@@ -172,20 +175,94 @@ def _get_year_parsed_lru(year_key):
         return _year_lru_data
 
 
+def _year_resolve_paths(year_key):
+    """Return ('jsonl', path) if a line-delimited file exists, else ('json', path), else (None, None)."""
+    m = active_year_mapping()
+    fn = m.get(year_key)
+    if not fn:
+        return None, None
+    stem = Path(fn).stem
+    jsonl = DATA_DIR / f"{stem}.jsonl"
+    jsonp = DATA_DIR / fn
+    if jsonl.is_file():
+        return "jsonl", jsonl
+    if jsonp.is_file():
+        return "json", jsonp
+    return None, None
+
+
+class _JsonlQuestionList:
+    """Lazy view over one JSONL file: stream iterations; single-pass cached stats for len/get_years."""
+
+    __slots__ = ("_path", "_scan")
+
+    def __init__(self, path):
+        self._path = Path(path)
+        self._scan = None  # (mtime_ns, first_item, (q_st, cc_n, cc_q), n_items)
+
+    def _ensure_scan(self):
+        st = self._path.stat()
+        if self._scan and self._scan[0] == st.st_mtime_ns:
+            return
+        first = None
+        acc = _qst_cc_acc_new()
+        n = 0
+        with open(self._path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                item = json.loads(line)
+                if first is None:
+                    first = item
+                _qst_cc_acc_add(acc, item)
+                n += 1
+        self._scan = (st.st_mtime_ns, first, _qst_cc_acc_totals(acc), n)
+
+    def scan_meta(self):
+        """One full pass (cached): first question dict or None, QST/CC totals tuple, row count."""
+        self._ensure_scan()
+        return self._scan[1], self._scan[2], self._scan[3]
+
+    def __len__(self):
+        self._ensure_scan()
+        return self._scan[3]
+
+    def __iter__(self):
+        with open(self._path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                yield json.loads(line)
+
+    def __getitem__(self, idx):
+        if idx == 0:
+            for item in self:
+                return item
+            raise IndexError(0)
+        for i, item in enumerate(self):
+            if i == idx:
+                return item
+        raise IndexError(idx)
+
+
 class _YearDatasetView:
-    """Mapping year_key -> parsed JSON; loads one year at a time (LRU 1)."""
+    """year_key -> either streaming JSONL wrapper dict or parsed JSON (LRU 1 for .json only)."""
 
     def keys(self):
-        m = active_year_mapping()
-        return [k for k, fn in m.items() if (DATA_DIR / fn).exists()]
+        return [k for k in active_year_mapping().keys() if _year_resolve_paths(k)[0]]
 
     def __contains__(self, year_key):
-        m = active_year_mapping()
-        fn = m.get(year_key)
-        return bool(fn and (DATA_DIR / fn).exists())
+        return _year_resolve_paths(year_key)[0] is not None
 
     def __getitem__(self, year_key):
-        return _get_year_parsed_lru(year_key)
+        kind, path = _year_resolve_paths(year_key)
+        if kind == "jsonl":
+            return {"questions": _JsonlQuestionList(path), "year": None}
+        if kind == "json":
+            return _get_year_parsed_lru(year_key)
+        raise KeyError(year_key)
 
     def items(self):
         for k in self.keys():
@@ -474,7 +551,7 @@ def load_data():
     global _load_data_logged
     if not _load_data_logged:
         keys = ", ".join(active_year_mapping().keys())
-        print(f"[INFO] Question data: {DATA_DIR} (years: {keys}; at most one year JSON in RAM)")
+        print(f"[INFO] Question data: {DATA_DIR} (years: {keys}; prefer *.jsonl else one .json in RAM)")
         _load_data_logged = True
     return _DATASET_SINGLETON
 
@@ -878,25 +955,41 @@ def get_years():
     data = load_data()
     years = []
     for year_key in active_year_mapping().keys():
-        if year_key in data:
-            year_data = data[year_key]
-            items = _year_items(year_data)
-            if len(items) > 0:
-                first_item = items[0]
-                meta = first_item.get("meta", first_item)
-                label = meta.get('year_label') or YEAR_LABELS.get(year_key) or (year_data.get('year') if isinstance(year_data, dict) else None) or year_key
-                q_st, cc_n, cc_q = _count_qst_cc_from_items(items)
-                years.append({
-                    "id": year_key,
-                    "label": label,
-                    "name": meta.get('year_name', year_key),
-                    # Some UI code (e.g. signup) filters years by `forSale`.
-                    # Always include it so the dropdown never becomes empty if it hits /years instead of /years/public.
-                    "forSale": True,
-                    "questionsCount": q_st,
-                    "clinicalCasesCount": cc_n,
-                    "clinicalCasesQuestionsCount": cc_q,
-                })
+        if year_key not in data:
+            continue
+        year_data = data[year_key]
+        items = _year_items(year_data)
+        if isinstance(items, _JsonlQuestionList):
+            first_item, (q_st, cc_n, cc_q), n = items.scan_meta()
+            if n <= 0:
+                continue
+            meta = first_item.get("meta", first_item) if isinstance(first_item, dict) else {}
+            label = meta.get("year_label") or YEAR_LABELS.get(year_key) or year_key
+            years.append({
+                "id": year_key,
+                "label": label,
+                "name": meta.get("year_name", year_key),
+                "forSale": True,
+                "questionsCount": q_st,
+                "clinicalCasesCount": cc_n,
+                "clinicalCasesQuestionsCount": cc_q,
+            })
+        elif len(items) > 0:
+            first_item = items[0]
+            meta = first_item.get("meta", first_item)
+            label = meta.get('year_label') or YEAR_LABELS.get(year_key) or (year_data.get('year') if isinstance(year_data, dict) else None) or year_key
+            q_st, cc_n, cc_q = _count_qst_cc_from_items(items)
+            years.append({
+                "id": year_key,
+                "label": label,
+                "name": meta.get('year_name', year_key),
+                # Some UI code (e.g. signup) filters years by `forSale`.
+                # Always include it so the dropdown never becomes empty if it hits /years instead of /years/public.
+                "forSale": True,
+                "questionsCount": q_st,
+                "clinicalCasesCount": cc_n,
+                "clinicalCasesQuestionsCount": cc_q,
+            })
     return jsonify(years)
 
 
@@ -905,8 +998,8 @@ def get_years_public():
     """Signup page: curriculum years with forSale for year dropdown."""
     # Do not call load_data() here — parsing multi‑GB JSON on signup was OOM‑killing small instances.
     out = []
-    for year_key, filename in active_year_mapping().items():
-        if not (DATA_DIR / filename).exists():
+    for year_key, _ in active_year_mapping().items():
+        if _year_resolve_paths(year_key)[0] is None:
             continue
         out.append({
             "id": year_key,

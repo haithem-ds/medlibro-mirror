@@ -12,6 +12,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY medlibro_website_scraper/ .
 
+# Stream *.json -> *.jsonl (low RAM); drop *.json so runtime never calls json.load on multi‑GB files.
+RUN python build_jsonl.py --data-dir /app/Data --drop-json
+
 RUN mkdir -p /data
 
 EXPOSE 8080

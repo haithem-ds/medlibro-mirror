@@ -6,12 +6,19 @@ This repo is laid out for a **Docker** deploy: `Data/` (question JSON) plus `med
 
 | Variable | Purpose | Default (local) |
 |----------|---------|-----------------|
-| `MEDLIBRO_DATA_DIR` | Folder with `1st.json`, `2nd.json`, … | Parent `Data/` |
+| `MEDLIBRO_DATA_DIR` | Folder with curriculum files: **`*.jsonl` preferred** (one question JSON per line), else `*.json` | Parent `Data/` |
 | `MEDLIBRO_STATE_DIR` | Writable folder for `mirror_users.json` and `mirror_sessions.json` | App folder |
-| `MEDLIBRO_YEAR_KEYS` | Optional comma‑separated subset of curriculum keys exposed in the API (e.g. `1st,2nd,3rd`). Omit for **all** years present under `MEDLIBRO_DATA_DIR`. | All keys in `serve_mirror.py` mapping whose JSON file exists |
+| `MEDLIBRO_YEAR_KEYS` | Optional comma‑separated subset of curriculum keys exposed in the API (e.g. `1st,2nd,3rd`). Omit for **all** years present under `MEDLIBRO_DATA_DIR`. | All keys in `serve_mirror.py` whose `*.jsonl` or `*.json` exists in the data dir |
 | `PORT` | HTTP port | `8080` (Render sets this automatically) |
 
-**Memory:** the mirror keeps **at most one full year JSON parsed in RAM** (LRU) and aggregates counts incrementally (no giant “all questions” lists for themes/chapters/courses). That lets the free tier serve **all** year files for testing. You can still OOM if a **single** endpoint builds a huge response (e.g. an unfiltered session/revision edge list); use filters or a larger instance if that happens.
+**Memory (Render 512MB):** the Docker build runs `build_jsonl.py`: it streams each `*.json` to `*.jsonl` with **ijson** (low RAM at build), then **removes** the original `.json`. At runtime the server reads **one line / one question at a time**, so it never runs `json.load()` on a multi‑GB file. If only `.json` files are present (local dev without conversion), at most **one** full year is parsed (LRU). You can still OOM if an endpoint materializes a **huge** list (e.g. unfiltered revision/session edges); use filters or a larger plan if that happens.
+
+Local one-off conversion (optional, if not using Docker):
+
+```powershell
+pip install ijson
+python medlibro_website_scraper/build_jsonl.py --data-dir Data
+```
 
 ## GitHub
 
