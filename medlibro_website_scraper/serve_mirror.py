@@ -3283,7 +3283,9 @@ setInterval(nuke,1200);
         html = re.sub(r"<script[^>]*>.*?local_jwt_token.*?</script>", "", html, flags=re.DOTALL | re.IGNORECASE)
         # Inject our script RIGHT after <head> tag (before any other content)
         if "<head" in html:
-            html = re.sub(r"(<head[^>]*>)", r"\1\n" + auth_script, html, count=1)
+            # Callable replacement: auth_script contains "\\" for JS regex; if concatenated into a re.sub
+            # replacement template, "\\s" etc. are interpreted as invalid regex escapes (re.error).
+            html = re.sub(r"(<head[^>]*>)", lambda m: m.group(1) + "\n" + auth_script, html, count=1)
         else:
             # Fallback: inject at very beginning of HTML
             html = auth_script + "\n" + html
