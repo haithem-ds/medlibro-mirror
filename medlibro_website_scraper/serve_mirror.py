@@ -557,6 +557,28 @@ def _strip_memorix_from_clientlayout_js(js: str) -> str:
     return js
 
 
+def _strip_memorix_from_dashboard_js(js: str) -> str:
+    """Remove Memorix shortcut card + Memorix themes card from DashboardPage chunk."""
+    if not js or "memorix" not in js.lower():
+        return js
+    js = js.replace(
+        'i("PrimaryShortcut",{staticClass:"flex-grow-1",attrs:{locked:!t.isValid||!t.isPremium,'
+        '"leading-icon":"mdi-brain",title:"memorix",to:"memorix","trailing-icon":"mdi-chevron-right"}}),',
+        "",
+        1,
+    )
+    js = re.sub(
+        r"y=\(\)=>[a-zA-Z_$][a-zA-Z0-9_$]*\(\(\)=>import\(\"\./MemorixTopThemesCard-[^\"]+\.js\"\),__vite__mapDeps\(\[[^\]]+\]\)\),",
+        "",
+        js,
+        count=1,
+    )
+    js = js.replace("MemorixTopThemesCard:y,", "").replace(",MemorixTopThemesCard:y", "")
+    js = js.replace('t.isPremium?i("memorix-top-themes-card"):t._e(),', "")
+    js = re.sub(r',"(?:assets/)?MemorixTopThemesCard-[^"]+\.js"', "", js)
+    return js
+
+
 def _memorix_stub_esm() -> str:
     """Minimal Vue component stub so imports stay valid after Memorix chunks are gutted."""
     return "export default{name:\"MLStub\",render:function(){return null}};\n"
@@ -1027,6 +1049,61 @@ def _year_items(year_data):
     return []
 
 _load_data_logged = False
+_years_api_payload_cache = None
+_years_api_payload_lock = threading.Lock()
+
+
+def _build_years_api_payload_list():
+    """Scan data for curriculum-year stats (Révision › Année d'étude); called once then cached."""
+    data = load_data()
+    years = []
+    for year_key in active_year_mapping().keys():
+        if year_key not in data:
+            continue
+        year_data = data[year_key]
+        items = _year_items(year_data)
+        if isinstance(items, _JsonlQuestionList):
+            first_item, (q_st, cc_n, cc_q), n = items.scan_meta()
+            if n <= 0:
+                continue
+            meta = first_item.get("meta", first_item) if isinstance(first_item, dict) else {}
+            label = meta.get("year_label") or YEAR_LABELS.get(year_key) or year_key
+            years.append({
+                "id": year_key,
+                "label": label,
+                "name": meta.get("year_name", year_key),
+                "forSale": True,
+                "questionsCount": q_st,
+                "clinicalCasesCount": cc_n,
+                "clinicalCasesQuestionsCount": cc_q,
+            })
+        elif len(items) > 0:
+            first_item = items[0]
+            meta = first_item.get("meta", first_item)
+            label = meta.get('year_label') or YEAR_LABELS.get(year_key) or (year_data.get('year') if isinstance(year_data, dict) else None) or year_key
+            q_st, cc_n, cc_q = _count_qst_cc_from_items(items)
+            years.append({
+                "id": year_key,
+                "label": label,
+                "name": meta.get('year_name', year_key),
+                "forSale": True,
+                "questionsCount": q_st,
+                "clinicalCasesCount": cc_n,
+                "clinicalCasesQuestionsCount": cc_q,
+            })
+    return years
+
+
+def _prime_years_api_payload_cache():
+    """After JSON warm, precompute /api/v1/years so the dropdown is instant on Révision."""
+    global _years_api_payload_cache
+    try:
+        with _years_api_payload_lock:
+            if _years_api_payload_cache is None:
+                _years_api_payload_cache = _build_years_api_payload_list()
+                print("[INFO] Pre-cached /api/v1/years for revision year dropdown.")
+    except Exception as ex:
+        print(f"[WARN] Pre-cache /api/v1/years failed: {ex}")
 
 
 def load_data():
@@ -1041,6 +1118,7 @@ def load_data():
         )
         _warm_year_json_cache()
         _load_data_logged = True
+        _prime_years_api_payload_cache()
     return _DATASET_SINGLETON
 
 def find_question_by_id(question_id):
@@ -1440,44 +1518,14 @@ def get_v2_plans():
 @app.route('/api/v1/years', methods=['GET', 'POST'])
 def get_years():
     """Get all available years with QST/CC counts for dropdown (e.g. '3ème → 1,152 QST et 594 CC (3,224 QST)')."""
-    data = load_data()
-    years = []
-    for year_key in active_year_mapping().keys():
-        if year_key not in data:
-            continue
-        year_data = data[year_key]
-        items = _year_items(year_data)
-        if isinstance(items, _JsonlQuestionList):
-            first_item, (q_st, cc_n, cc_q), n = items.scan_meta()
-            if n <= 0:
-                continue
-            meta = first_item.get("meta", first_item) if isinstance(first_item, dict) else {}
-            label = meta.get("year_label") or YEAR_LABELS.get(year_key) or year_key
-            years.append({
-                "id": year_key,
-                "label": label,
-                "name": meta.get("year_name", year_key),
-                "forSale": True,
-                "questionsCount": q_st,
-                "clinicalCasesCount": cc_n,
-                "clinicalCasesQuestionsCount": cc_q,
-            })
-        elif len(items) > 0:
-            first_item = items[0]
-            meta = first_item.get("meta", first_item)
-            label = meta.get('year_label') or YEAR_LABELS.get(year_key) or (year_data.get('year') if isinstance(year_data, dict) else None) or year_key
-            q_st, cc_n, cc_q = _count_qst_cc_from_items(items)
-            years.append({
-                "id": year_key,
-                "label": label,
-                "name": meta.get('year_name', year_key),
-                # Some UI code (e.g. signup) filters years by `forSale`.
-                # Always include it so the dropdown never becomes empty if it hits /years instead of /years/public.
-                "forSale": True,
-                "questionsCount": q_st,
-                "clinicalCasesCount": cc_n,
-                "clinicalCasesQuestionsCount": cc_q,
-            })
+    global _years_api_payload_cache
+    load_data()
+    with _years_api_payload_lock:
+        if _years_api_payload_cache is not None:
+            return jsonify(_years_api_payload_cache)
+    years = _build_years_api_payload_list()
+    with _years_api_payload_lock:
+        _years_api_payload_cache = years
     return jsonify(years)
 
 
@@ -3113,6 +3161,13 @@ def serve(path):
         if path.startswith("assets/ClientLayout-") and path.endswith(".js"):
             js = file_path.read_text(encoding="utf-8", errors="replace")
             js = _strip_memorix_from_clientlayout_js(js)
+            r = Response(js, mimetype="application/javascript")
+            r.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            return r
+        # Dashboard: remove Memorix shortcut row + Memorix themes card (hash in filename).
+        if path.startswith("assets/DashboardPage-") and path.endswith(".js"):
+            js = file_path.read_text(encoding="utf-8", errors="replace")
+            js = _strip_memorix_from_dashboard_js(js)
             r = Response(js, mimetype="application/javascript")
             r.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
             return r
