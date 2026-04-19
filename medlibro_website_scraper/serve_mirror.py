@@ -313,8 +313,32 @@ def _merged_exam_source_years(body, depth=0):
     return _dedupe_year_ints(acc)
 
 
+def _question_sources_exam_years_ints(item):
+    """Return exam years from question.sources[].year only (MedLibro API row shape).
+
+    Scraped data often sets meta.sourcesYears to a long cumulative list so that field
+    makes year filters useless; the per-source ``year`` on each question row is the
+    value the real app uses for source-year filtering.
+    """
+    if not isinstance(item, dict):
+        return None
+    q = item.get("question")
+    if not isinstance(q, dict):
+        return None
+    acc = []
+    for src in (q.get("sources") or []):
+        if isinstance(src, dict) and src.get("year") is not None:
+            acc.extend(_exam_years_from_value(src.get("year")))
+    if not acc:
+        return None
+    return _dedupe_year_ints(acc)
+
+
 def _item_exam_year_ints(meta, item):
     """Flatten QCM exam years from meta.sourcesYears, question.sources, etc."""
+    prim = _question_sources_exam_years_ints(item)
+    if prim is not None:
+        return prim
     iy = []
     if isinstance(meta, dict):
         for y in meta.get("sourcesYears") or []:
@@ -1748,7 +1772,7 @@ def get_sources_by_theme(theme_id):
             meta = item.get("meta", item)
             if not _theme_matches(meta, theme_id):
                 continue
-            for yr in meta.get("sourcesYears") or []:
+            for yr in _item_exam_year_ints(meta, item):
                 _qst_cc_acc_add(year_buckets[yr], item)
     result = []
     for yr in sorted(year_buckets.keys(), reverse=True):
@@ -1781,10 +1805,8 @@ def post_sources():
             if not isinstance(item, dict):
                 continue
             meta = item.get("meta", item)
-            years = meta.get("sourcesYears") or []
-            if isinstance(years, list):
-                for yr in years:
-                    _qst_cc_acc_add(year_buckets[yr], item)
+            for yr in _item_exam_year_ints(meta, item):
+                _qst_cc_acc_add(year_buckets[yr], item)
     # One source per exam year, sorted descending (2022, 2021, 2018, ...)
     result = []
     for yr in sorted(year_buckets.keys(), reverse=True):
@@ -1852,7 +1874,7 @@ def post_sources_learn():
                 cslugs = [x.lower().replace(" ", "_").replace("'", "")[:50] for x in courses_norm if x]
                 if cid not in courses_norm and cslug not in cslugs and cslug not in courses_norm and cid not in cslugs:
                     continue
-            for yr in meta.get("sourcesYears") or []:
+            for yr in _item_exam_year_ints(meta, item):
                 year_counts[yr] += 1
     years_sorted = sorted(year_counts.keys(), reverse=True)
     if not years_sorted:
@@ -2188,12 +2210,16 @@ def _prepare_question_dict(raw, preferred_exam_years=None):
     theme_id = (meta.get("themeId") or "").strip() if isinstance(meta, dict) else ""
     theme_name = meta.get("theme") or meta.get("theme_label") or "" if isinstance(meta, dict) else ""
     year_label = meta.get("year") or (YEAR_LABELS.get(str(meta.get("year"))) if isinstance(meta, dict) else None) or "2nd"
-    years = meta.get("sourcesYears") if isinstance(meta, dict) else None
     year_id = (meta.get("yearId") or "").strip() if isinstance(meta, dict) else ""
     year_ints = []
-    if isinstance(years, list):
-        for y in years:
-            year_ints.extend(_exam_years_from_value(y))
+    src_prim = _question_sources_exam_years_ints(raw_copy)
+    if src_prim:
+        year_ints = list(src_prim)
+    else:
+        years = meta.get("sourcesYears") if isinstance(meta, dict) else None
+        if isinstance(years, list):
+            for y in years:
+                year_ints.extend(_exam_years_from_value(y))
     chosen_year = None
     if preferred_exam_years and year_ints:
         inter = [y for y in year_ints if y in preferred_exam_years]
