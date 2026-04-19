@@ -17,6 +17,9 @@ Optional environment (Docker / Render):
   MEDLIBRO_PREFER_JSONL — if 1/true, use *.jsonl when both .json and .jsonl exist (slower, lower peak RAM).
   MEDLIBRO_JSON_CACHE_YEARS — max parsed .json roots kept in RAM (default: all active years, cap 8). Set 1 for minimal RAM.
   MEDLIBRO_SKIP_JSON_WARMUP — if 1, do not preload .json years at startup (faster boot, slower first revision).
+
+  The SPA main script is read from mirror/index.html (e.g. assets/index-<hash>.js). Patching a single
+  hardcoded filename breaks after each MedLibro front-end build; we resolve the name at runtime.
 """
 from pathlib import Path
 import os
@@ -40,6 +43,37 @@ except ImportError:
 
 PROJECT = Path(__file__).parent
 MIRROR = PROJECT / "mirror"
+
+
+def _spa_main_js_relpath():
+    """Entry chunk path from mirror/index.html (hash changes each MedLibro build — never hardcode one name)."""
+    idx = MIRROR / "index.html"
+    if not idx.exists():
+        return "assets/index-AtrV5JHa.js"
+    try:
+        html = idx.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return "assets/index-AtrV5JHa.js"
+    m = re.search(r'src="(/assets/index-[^"\s]+\.js)"', html)
+    if m:
+        return m.group(1).lstrip("/").replace("//", "/")
+    return "assets/index-AtrV5JHa.js"
+
+
+def _request_json_dict():
+    """Parse JSON body even when Content-Type is missing or axios sends raw bytes."""
+    d = request.get_json(silent=True)
+    if isinstance(d, dict) and d:
+        return d
+    try:
+        raw = request.get_data(as_text=True)
+        if raw and raw.strip().startswith("{"):
+            parsed = json.loads(raw)
+            if isinstance(parsed, dict):
+                return parsed
+    except Exception:
+        pass
+    return {}
 
 
 def _path_from_env(name: str, default: Path) -> Path:
@@ -2006,7 +2040,7 @@ def _collect_question_edges_from_body(body, curriculum_year_key=None):
 @app.route('/api/v1/revision', methods=['POST'])
 def post_revision():
     """POST /api/v1/revision: body { yearId, themeId, chaptersIds[], coursesIds[], sources / sourcesYears[] }. Returns { items, totalQuestionsCounter }."""
-    body = request.get_json(silent=True) or {}
+    body = _request_json_dict()
     if not isinstance(body, dict):
         body = {}
     body = _revision_body_merge_query(body)
@@ -2032,7 +2066,7 @@ def post_revision():
 @app.route('/api/v1/exam', methods=['POST'])
 def post_exam_adaptive():
     """Exam adaptive mode: POST with same filter fields as revision (+ exam source years)."""
-    body = request.get_json(silent=True) or {}
+    body = _request_json_dict()
     if not isinstance(body, dict):
         body = {}
     body = _revision_body_merge_query(body)
@@ -2432,7 +2466,7 @@ def _runtime_session_edge(sid, meta):
 
 @app.route('/api/v2/sessions', methods=['POST'])
 def post_sessions():
-    body = request.get_json(silent=True) or {}
+    body = _request_json_dict()
     title = body.get("title") or "Session"
     sid = str(uuid.uuid4())[:8]
     # Curriculum year only — never use body["year"] here (often the selected QCM year, e.g. 2023).
@@ -2958,8 +2992,8 @@ def serve(path):
     if not str(file_path).startswith(str(MIRROR.resolve())):
         path = ""
     if path and file_path.is_file():
-        # Patch main bundle: bypass Ze() (connectedUser.status==="valid") so sidebar routes never redirect to dashboard
-        if path == "assets/index-AtrV5JHa.js":
+        # Patch SPA entry bundle (filename from index.html — hash varies per MedLibro release)
+        if path == _spa_main_js_relpath():
             js = file_path.read_text(encoding="utf-8", errors="replace")
             # When authenticated, always allow navigation (don't redirect to dashboard when Ze() is false)
             js = js.replace(
@@ -3219,6 +3253,29 @@ try {
   function start(){var n=0;var t=setInterval(function(){run();n++;if(n>50)clearInterval(t);},200);}
   if(document.readyState==='complete')start();else window.addEventListener('load',start);
 })();
+</script>
+<style id="ml-hide-memorix">a[href*="memorix"],a[href*="Memorix"],a[href*="mémorix"],a[href*="Mémorix"]{display:none!important}</style>
+<script>
+(function(){
+function memorixHref(h){return h&&String(h).toLowerCase().indexOf('memorix')>=0;}
+function memorixText(t){t=(t||'').replace(/\\s+/g,' ').trim();return/^m[eé]morix$/i.test(t)||t==='Memorix'||t==='Mémorix';}
+function nuke(){
+  try{
+    document.querySelectorAll('a[href], .v-list-item, .v-card, .v-btn, .v-tab').forEach(function(el){
+      if(memorixHref(el.getAttribute('href'))){el.remove();return;}
+      var tx=(el.textContent||'').replace(/\\s+/g,' ').trim();
+      if(memorixText(tx)&&tx.length<24){el.remove();return;}
+      if(el.classList&&el.classList.contains('v-card')){
+        var snippet=(el.textContent||'').slice(0,900);
+        if(/\\bm[eé]morix\\b/i.test(snippet)) el.remove();
+      }
+    });
+  }catch(e){}
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',nuke);else nuke();
+try{new MutationObserver(function(){nuke();}).observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
+setInterval(nuke,1200);
+})();
 </script>"""
         # Strategy: Remove ALL existing <script> tags in <head> that contain clearOld or auth logic
         # Then inject our script IMMEDIATELY after <head> tag (before any other scripts)
@@ -3253,6 +3310,7 @@ def main():
     print("Local API: /api/* (all handled locally, no external calls)")
     print("Data directory:", DATA_DIR)
     print("State directory:", _STATE_DIR)
+    print("SPA entry script (patched):", _spa_main_js_relpath())
     print("=" * 60)
     port = int(os.environ.get("PORT", "8080"))
     print(f"Open in browser: http://localhost:{port}")
