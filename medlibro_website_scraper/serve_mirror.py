@@ -17,6 +17,7 @@ Optional environment (Docker / Render):
   MEDLIBRO_PREFER_JSONL — if 1/true, use *.jsonl when both .json and .jsonl exist (slower, lower peak RAM).
   MEDLIBRO_JSON_CACHE_YEARS — max parsed .json roots kept in RAM (default: all active years, cap 8). Set 1 for minimal RAM.
   MEDLIBRO_SKIP_JSON_WARMUP — if 1, do not preload .json years at startup (faster boot, slower first revision).
+  MEDLIBRO_YEARS_FULL_STATS — if 1, /api/v1/years uses a full per-question scan for QST/CC stats (accurate but slow on huge JSON).
 
   The SPA main script is read from mirror/index.html (e.g. assets/index-<hash>.js). Patching a single
   hardcoded filename breaks after each MedLibro front-end build; we resolve the name at runtime.
@@ -1054,8 +1055,14 @@ _years_api_payload_lock = threading.Lock()
 
 
 def _build_years_api_payload_list():
-    """Scan data for curriculum-year stats (Révision › Année d'étude); called once then cached."""
+    """Build curriculum-year rows for Révision › Année d'étude (cached).
+
+    Default for .json corpora is **fast**: use list length / root ``total``, not a full scan
+    (scanning every row per year delayed the dropdown). Set ``MEDLIBRO_YEARS_FULL_STATS=1``
+    for exact QST/CC splits (slow on large files).
+    """
     data = load_data()
+    full_stats = _env_truthy("MEDLIBRO_YEARS_FULL_STATS")
     years = []
     for year_key in active_year_mapping().keys():
         if year_key not in data:
@@ -1081,7 +1088,16 @@ def _build_years_api_payload_list():
             first_item = items[0]
             meta = first_item.get("meta", first_item)
             label = meta.get('year_label') or YEAR_LABELS.get(year_key) or (year_data.get('year') if isinstance(year_data, dict) else None) or year_key
-            q_st, cc_n, cc_q = _count_qst_cc_from_items(items)
+            if full_stats:
+                q_st, cc_n, cc_q = _count_qst_cc_from_items(items)
+            else:
+                cc_n = cc_q = 0
+                q_st = len(items)
+                if isinstance(year_data, dict) and year_data.get("total") is not None:
+                    try:
+                        q_st = int(year_data["total"])
+                    except (TypeError, ValueError):
+                        pass
             years.append({
                 "id": year_key,
                 "label": label,
@@ -1522,11 +1538,15 @@ def get_years():
     load_data()
     with _years_api_payload_lock:
         if _years_api_payload_cache is not None:
-            return jsonify(_years_api_payload_cache)
+            r = jsonify(_years_api_payload_cache)
+            r.headers["Cache-Control"] = "private, max-age=120"
+            return r
     years = _build_years_api_payload_list()
     with _years_api_payload_lock:
         _years_api_payload_cache = years
-    return jsonify(years)
+    r = jsonify(years)
+    r.headers["Cache-Control"] = "private, max-age=120"
+    return r
 
 
 @app.route('/api/v1/years/public', methods=['GET'])
@@ -3402,6 +3422,11 @@ try {
   var isPublic=publicPaths.indexOf(path)!==-1 || path==='' || path==='/';
   if(!ok && !isPublic) { window.location.replace('/login'); return; }
   if(ok && (path===''||path==='/')) { window.location.replace('/dashboard'); return; }
+  if(ok) {
+    try {
+      fetch(window.location.origin + '/api/v1/years', { credentials: 'include' }).catch(function(){});
+    } catch(e0) {}
+  }
 }catch(e){}
 })();
 </script>
