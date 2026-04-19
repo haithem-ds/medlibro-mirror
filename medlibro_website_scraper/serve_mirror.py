@@ -17,8 +17,10 @@ Optional environment (Docker / Render):
   MEDLIBRO_PREFER_JSONL — if 1/true, use *.jsonl when both .json and .jsonl exist (slower, lower peak RAM).
   MEDLIBRO_JSON_CACHE_YEARS — max parsed .json roots kept in RAM (default: all active years, cap 8). Set 1 for minimal RAM.
   MEDLIBRO_SKIP_JSON_WARMUP — if 1, do not preload .json years at startup (faster boot, slower first revision).
-  MEDLIBRO_YEARS_FAST — if 1, /api/v1/years uses approximate counts (no per-question CC scan; faster boot). Default is full scan
-    so Année d'étude shows QST et CC like production. Legacy: MEDLIBRO_YEARS_FULL_STATS=0 opts into the fast path if MEDLIBRO_YEARS_FAST is unset.
+  MEDLIBRO_YEARS_FAST — if 1, /api/v1/years uses approximate counts (no per-question CC scan). Default is full scan with QST/CC.
+  Full stats are written to MEDLIBRO_STATE_DIR/medlibro_years_stats_cache.json so the next process start (and Gunicorn workers)
+    can load Année d'étude instantly without re-scanning. Delete that file after a data update if counts look stale.
+  MEDLIBRO_SKIP_STARTUP_WARM — if 1, skip import-time load_data() (tests / defer heavy warm to first request).
 
   The SPA main script is read from mirror/index.html (e.g. assets/index-<hash>.js). Patching a single
   hardcoded filename breaks after each MedLibro front-end build; we resolve the name at runtime.
@@ -786,6 +788,7 @@ _DATASET_SINGLETON = _YearDatasetView()
 TOKEN_PREFIX = "mloc_"
 USERS_STORE_PATH = _STATE_DIR / "mirror_users.json"
 SESSIONS_STORE_PATH = _STATE_DIR / "mirror_sessions.json"
+YEARS_STATS_CACHE_PATH = _STATE_DIR / "medlibro_years_stats_cache.json"
 SEED_USERS_PATH = PROJECT / "mirror_users_seed.json"
 
 _users_by_email = {}
@@ -1055,6 +1058,66 @@ _years_api_payload_cache = None
 _years_api_payload_lock = threading.Lock()
 
 
+def _years_stats_cache_fingerprint() -> str:
+    """Stable id for dataset + paths + CC mode; used to skip rescan when files unchanged."""
+    parts = [
+        str(DATA_DIR.resolve()),
+        ",".join(sorted(active_year_mapping().keys())),
+        "fast" if _env_truthy("MEDLIBRO_YEARS_FAST") else "full",
+    ]
+    if os.environ.get("MEDLIBRO_YEARS_FULL_STATS") is not None:
+        parts.append("fs:" + ("1" if _env_truthy("MEDLIBRO_YEARS_FULL_STATS") else "0"))
+    for yk in sorted(active_year_mapping().keys()):
+        kind, path = _year_resolve_paths(yk)
+        if path is not None and path.is_file():
+            try:
+                parts.append(f"{yk}:{kind}:{path.stat().st_mtime_ns}:{path.stat().st_size}")
+            except OSError:
+                parts.append(f"{yk}:{kind}:unstat")
+        else:
+            parts.append(f"{yk}:missing")
+    return "|".join(parts)
+
+
+def _try_load_years_stats_cache_from_disk():
+    """Return cached year rows if file exists and fingerprint matches."""
+    if not YEARS_STATS_CACHE_PATH.is_file():
+        return None
+    try:
+        with open(YEARS_STATS_CACHE_PATH, encoding="utf-8") as f:
+            o = json.load(f)
+        if not isinstance(o, dict) or o.get("version") != 1:
+            return None
+        if o.get("fingerprint") != _years_stats_cache_fingerprint():
+            return None
+        y = o.get("years")
+        if not isinstance(y, list) or not y:
+            return None
+        return y
+    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+        return None
+
+
+def _save_years_stats_cache_to_disk(payload: list) -> None:
+    try:
+        YEARS_STATS_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        tmp = YEARS_STATS_CACHE_PATH.with_suffix(".tmp")
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    "version": 1,
+                    "fingerprint": _years_stats_cache_fingerprint(),
+                    "years": payload,
+                    "savedAt": datetime.now(timezone.utc).isoformat(),
+                },
+                f,
+                ensure_ascii=False,
+            )
+        tmp.replace(YEARS_STATS_CACHE_PATH)
+    except OSError as ex:
+        print(f"[WARN] Could not save years stats cache: {ex}")
+
+
 def _build_years_api_payload_list():
     """Build curriculum-year rows for Révision › Année d'étude (cached).
 
@@ -1117,13 +1180,24 @@ def _build_years_api_payload_list():
 
 
 def _prime_years_api_payload_cache():
-    """After JSON warm, precompute /api/v1/years so the dropdown is instant on Révision."""
+    """Fill /api/v1/years cache: disk snapshot first (instant CC stats), else full scan + save.
+    Called from load_data after _load_data_logged is True so _build_years_api_payload_list can call load_data() safely.
+    """
     global _years_api_payload_cache
     try:
         with _years_api_payload_lock:
-            if _years_api_payload_cache is None:
-                _years_api_payload_cache = _build_years_api_payload_list()
-                print("[INFO] Pre-cached /api/v1/years for revision year dropdown.")
+            if _years_api_payload_cache is not None:
+                return
+            disk = _try_load_years_stats_cache_from_disk()
+            if disk is not None:
+                _years_api_payload_cache = disk
+                print(
+                    "[INFO] Loaded /api/v1/years from disk cache (instant Année d'étude with QST/CC)."
+                )
+                return
+            _years_api_payload_cache = _build_years_api_payload_list()
+            _save_years_stats_cache_to_disk(_years_api_payload_cache)
+            print("[INFO] Pre-cached /api/v1/years (full scan + saved to medlibro_years_stats_cache.json).")
     except Exception as ex:
         print(f"[WARN] Pre-cache /api/v1/years failed: {ex}")
 
@@ -1132,15 +1206,17 @@ def load_data():
     """Return the lazy year view; parsed .json years stay in a multi-entry cache (see MEDLIBRO_JSON_CACHE_YEARS)."""
     global _load_data_logged
     if not _load_data_logged:
+        # Set early so nested load_data() (from _build_years_api_payload_list) does not recurse.
+        _load_data_logged = True
         keys = ", ".join(active_year_mapping().keys())
         cap = _year_json_cache_capacity()
         print(
             f"[INFO] Question data: {DATA_DIR} (years: {keys}; json cache up to {cap} years; "
             f"prefer .json unless MEDLIBRO_PREFER_JSONL=1)"
         )
-        _warm_year_json_cache()
-        _load_data_logged = True
+        # Years + CC first: disk cache loads without parsing all JSON; cold build lazy-reads per year.
         _prime_years_api_payload_cache()
+        _warm_year_json_cache()
     return _DATASET_SINGLETON
 
 def find_question_by_id(question_id):
@@ -1548,6 +1624,7 @@ def get_years():
             r.headers["Cache-Control"] = "private, max-age=120"
             return r
     years = _build_years_api_payload_list()
+    _save_years_stats_cache_to_disk(years)
     with _years_api_payload_lock:
         _years_api_payload_cache = years
     r = jsonify(years)
@@ -3536,6 +3613,19 @@ def main():
     print("=" * 60)
     load_data()
     app.run(host="0.0.0.0", port=port, threaded=True)
+
+
+def _startup_warm_if_enabled():
+    """Gunicorn imports this module without running main(); warm dataset + years cache before serving."""
+    if _env_truthy("MEDLIBRO_SKIP_STARTUP_WARM"):
+        return
+    try:
+        load_data()
+    except Exception as ex:
+        print(f"[WARN] Import-time dataset warm failed (first request may be slower): {ex}")
+
+
+_startup_warm_if_enabled()
 
 
 if __name__ == "__main__":
