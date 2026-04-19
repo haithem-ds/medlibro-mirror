@@ -17,7 +17,8 @@ Optional environment (Docker / Render):
   MEDLIBRO_PREFER_JSONL — if 1/true, use *.jsonl when both .json and .jsonl exist (slower, lower peak RAM).
   MEDLIBRO_JSON_CACHE_YEARS — max parsed .json roots kept in RAM (default: all active years, cap 8). Set 1 for minimal RAM.
   MEDLIBRO_SKIP_JSON_WARMUP — if 1, do not preload .json years at startup (faster boot, slower first revision).
-  MEDLIBRO_YEARS_FULL_STATS — if 1, /api/v1/years uses a full per-question scan for QST/CC stats (accurate but slow on huge JSON).
+  MEDLIBRO_YEARS_FAST — if 1, /api/v1/years uses approximate counts (no per-question CC scan; faster boot). Default is full scan
+    so Année d'étude shows QST et CC like production. Legacy: MEDLIBRO_YEARS_FULL_STATS=0 opts into the fast path if MEDLIBRO_YEARS_FAST is unset.
 
   The SPA main script is read from mirror/index.html (e.g. assets/index-<hash>.js). Patching a single
   hardcoded filename breaks after each MedLibro front-end build; we resolve the name at runtime.
@@ -1057,12 +1058,17 @@ _years_api_payload_lock = threading.Lock()
 def _build_years_api_payload_list():
     """Build curriculum-year rows for Révision › Année d'étude (cached).
 
-    Default for .json corpora is **fast**: use list length / root ``total``, not a full scan
-    (scanning every row per year delayed the dropdown). Set ``MEDLIBRO_YEARS_FULL_STATS=1``
-    for exact QST/CC splits (slow on large files).
+    Default: full per-item QST/CC scan so the dropdown matches production (``… QST et N CC (…)``).
+    Set ``MEDLIBRO_YEARS_FAST=1`` to use approximate counts only (faster on huge JSON). Legacy: if
+    ``MEDLIBRO_YEARS_FULL_STATS`` is set and ``MEDLIBRO_YEARS_FAST`` is not, 0/1 still toggles full scan.
     """
     data = load_data()
-    full_stats = _env_truthy("MEDLIBRO_YEARS_FULL_STATS")
+    if _env_truthy("MEDLIBRO_YEARS_FAST"):
+        full_stats = False
+    elif os.environ.get("MEDLIBRO_YEARS_FULL_STATS") is not None:
+        full_stats = _env_truthy("MEDLIBRO_YEARS_FULL_STATS")
+    else:
+        full_stats = True
     years = []
     for year_key in active_year_mapping().keys():
         if year_key not in data:
@@ -2287,6 +2293,15 @@ def _session_preferred_exam_years(session_id):
     return frozenset(acc) if acc else None
 
 
+def _strip_question_notes_for_api(q):
+    """Remove embedded/user note payloads so the mirror never exposes notes on questions."""
+    if not isinstance(q, dict):
+        return
+    q["notes"] = []
+    for k in ("userNotes", "privateNotes", "myNotes"):
+        q.pop(k, None)
+
+
 def _prepare_question_dict(raw, preferred_exam_years=None):
     """Build MedLibro flat question dict from raw item (same shape as GET /api/v1/questions/:id)."""
     if not raw or not isinstance(raw, dict):
@@ -2311,13 +2326,13 @@ def _prepare_question_dict(raw, preferred_exam_years=None):
     year_label = meta.get("year") or (YEAR_LABELS.get(str(meta.get("year"))) if isinstance(meta, dict) else None) or "2nd"
     year_id = (meta.get("yearId") or "").strip() if isinstance(meta, dict) else ""
     year_ints = []
+    sources_years_meta = meta.get("sourcesYears") if isinstance(meta, dict) else None
     src_prim = _question_sources_exam_years_ints(raw_copy)
     if src_prim:
         year_ints = list(src_prim)
     else:
-        years = meta.get("sourcesYears") if isinstance(meta, dict) else None
-        if isinstance(years, list):
-            for y in years:
+        if isinstance(sources_years_meta, list):
+            for y in sources_years_meta:
                 year_ints.extend(_exam_years_from_value(y))
     chosen_year = None
     if preferred_exam_years and year_ints:
@@ -2329,14 +2344,14 @@ def _prepare_question_dict(raw, preferred_exam_years=None):
         chosen_year = max(year_ints)
     if chosen_year is not None:
         year_id = str(chosen_year)
-    elif not year_id and years:
-        year_id = str(years[0])
+    elif not year_id and isinstance(sources_years_meta, list) and sources_years_meta:
+        year_id = str(sources_years_meta[0])
     q["theme"] = {
         "id": theme_id,
         "name": theme_name,
         "year": {"id": year_id, "label": str(year_label)}
     }
-    q["notes"] = q.get("notes") if isinstance(q.get("notes"), list) else []
+    _strip_question_notes_for_api(q)
     q["attachedTo"] = q.get("attachedTo") if isinstance(q.get("attachedTo"), (int, float)) else 0
     return q
 
@@ -2349,12 +2364,17 @@ def get_question(question_id):
         return jsonify({"error": "Question not found"}), 404
     q = _prepare_question_dict(raw)
     if q is None:
-        return jsonify(json.loads(json.dumps(raw)))
+        raw_copy = json.loads(json.dumps(raw))
+        if isinstance(raw_copy.get("question"), dict):
+            _strip_question_notes_for_api(raw_copy["question"])
+        elif isinstance(raw_copy, dict) and "notes" in raw_copy:
+            _strip_question_notes_for_api(raw_copy)
+        return jsonify(raw_copy)
     return jsonify(q)
 
 # Preferences: store expects an array (uses .find()); items have id, label, value
 DEFAULT_PREFERENCES = [
-    {"id": "pref-hide-notes", "label": "hide-notes-in-exam", "value": "false"},
+    {"id": "pref-hide-notes", "label": "hide-notes-in-exam", "value": "true"},
     {"id": "pref-scoring", "label": "scoring-mode", "value": "binary-mode"},
 ]
 
@@ -2444,7 +2464,7 @@ def get_playlists_pinned():
 _runtime_sessions = {}
 # Session highlights sync (GET/PATCH /api/v2/sessions/<id>/highlights)
 _runtime_session_highlights = {}
-# Notes: AnswerDialog uses /api/v1/notes/note; NotesCard uses /api/v2/notes/... — same in-memory bucket.
+# Notes: API routes are no-ops; questions always return notes: [] (see _strip_question_notes_for_api).
 LOCAL_NOTE_USER_ID = "local-mirror-user"
 
 
@@ -2490,20 +2510,8 @@ def _embedded_notes_list(item):
 
 
 def _question_notes_merged_for_api(item, pq):
-    """Attach embedded + runtime notes to prepared question dict."""
-    qid = _question_id(item)
-    embedded = pq.get("notes") if isinstance(pq.get("notes"), list) else []
-    out = list(embedded)
-    if qid is not None:
-        for n in _runtime_notes_v2.get(str(qid), []):
-            out.append({
-                "id": n.get("id"),
-                "value": n.get("value"),
-                "date": n.get("date"),
-                "createdAt": n.get("createdAt"),
-                "updatedAt": n.get("updatedAt"),
-            })
-    return out
+    """Notes disabled in mirror — always empty."""
+    return []
 
 
 @app.route('/api/v2/cards/themes/top', methods=['GET'])
@@ -2960,22 +2968,13 @@ def _note_v2_find(note_id):
 
 @app.route('/api/v2/notes/questions/<question_id>/count', methods=['GET'])
 def v2_notes_question_count(question_id):
-    n = len(_runtime_notes_v2.get(str(question_id), []))
-    raw = find_question_by_id(question_id)
-    if raw:
-        for note in _embedded_notes_list(raw):
-            if isinstance(note, dict) and str(note.get("value") or "").strip():
-                n += 1
-            elif isinstance(note, str) and note.strip():
-                n += 1
-    return jsonify(n)
+    return jsonify(0)
 
 
 @app.route('/api/v2/notes/questions/<question_id>', methods=['GET'])
 def v2_notes_question_list(question_id):
-    edges = list(_runtime_notes_v2.get(str(question_id), []))
     return jsonify({
-        "edges": edges,
+        "edges": [],
         "pageInfo": {"hasNextPage": False, "nextPage": None},
     })
 
@@ -2987,50 +2986,43 @@ def v2_notes_post():
     value = (body.get("value") or "").strip()
     if not qid or not value:
         return jsonify({"message": "Invalid note"}), 400
-    return jsonify(_note_v2_create(qid, value)), 201
+    return jsonify({
+        "id": "ml-mirror-notes-off",
+        "questionId": str(qid),
+        "value": "",
+        "createdAt": None,
+        "updatedAt": None,
+    }), 201
 
 
 @app.route('/api/v2/notes/<note_id>', methods=['PATCH', 'DELETE'])
 def v2_notes_one(note_id):
-    qid, note = _note_v2_find(note_id)
-    if not note:
-        return jsonify({"message": "Note not found"}), 404
     if request.method == 'DELETE':
-        _runtime_notes_v2[qid] = [n for n in _runtime_notes_v2[qid] if n.get("id") != note_id]
         return "", 204
-    body = request.get_json(silent=True) or {}
-    val = body.get("value")
-    if val is not None:
-        _note_apply_patch(note, str(val).strip())
-    return jsonify(note)
+    return jsonify({"id": note_id, "value": "", "version": 0}), 200
 
 
 @app.route('/api/v1/notes/note', methods=['POST'])
 def v1_notes_post_note():
-    """AnswerDialog: POST { value, question } — same as medlibro.co (201 + full note)."""
+    """AnswerDialog: POST { value, question } — mirror accepts but does not store notes."""
     body = request.get_json(silent=True) or {}
     value = (body.get("value") or "").strip()
     qid = body.get("question") or body.get("questionId") or body.get("question_id")
     if not qid or not value:
         return jsonify({"message": "Invalid note"}), 400
-    note = _note_v2_create(qid, value)
-    return jsonify(note), 201
+    return jsonify({
+        "id": "ml-mirror-notes-off",
+        "question": str(qid),
+        "value": "",
+        "version": 0,
+    }), 201
 
 
 @app.route('/api/v1/notes/note/<note_id>', methods=['PATCH', 'DELETE'])
 def v1_notes_note_one(note_id):
-    qid, note = _note_v2_find(note_id)
-    if not note:
-        return jsonify({"message": "Note not found"}), 404
     if request.method == 'DELETE':
-        _runtime_notes_v2[qid] = [n for n in _runtime_notes_v2[qid] if n.get("id") != note_id]
         return "", 204
-    body = request.get_json(silent=True) or {}
-    val = body.get("value")
-    if val is None:
-        return jsonify(note)
-    _note_apply_patch(note, str(val).strip())
-    return jsonify(note)
+    return jsonify({"id": note_id, "question": "", "value": "", "version": 0}), 200
 
 
 # ----- Playlists (v1) – list/search with edges + pageInfo -----
@@ -3479,6 +3471,26 @@ function nuke(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',nuke);else nuke();
 try{new MutationObserver(function(){nuke();}).observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
 setInterval(nuke,1200);
+})();
+</script>
+<script>
+(function(){
+function noteUiText(t){t=(t||'').replace(/\\s+/g,' ').trim();return/vos notes priv|quelles sont vos notes|notes priv/i.test(t);}
+function nukeNotes(){
+  try{
+    document.querySelectorAll('button,.v-btn,.v-card,.v-sheet,.v-toolbar,.v-footer').forEach(function(el){
+      var tx=(el.textContent||'').replace(/\\s+/g,' ').trim();
+      if(noteUiText(tx)&&tx.length<120){el.remove();return;}
+    });
+    document.querySelectorAll('textarea,input[placeholder]').forEach(function(el){
+      var ph=(el.getAttribute('placeholder')||'');
+      if(/quelles sont vos notes/i.test(ph)){var p=el.closest('.v-input,.v-text-field,.v-card');if(p)p.remove();else el.remove();}
+    });
+  }catch(e){}
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',nukeNotes);else nukeNotes();
+try{new MutationObserver(function(){nukeNotes();}).observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
+setInterval(nukeNotes,1200);
 })();
 </script>"""
         # Strategy: Remove ALL existing <script> tags in <head> that contain clearOld or auth logic
