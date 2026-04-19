@@ -1619,8 +1619,23 @@ def _collect_question_edges(
     return items_out
 
 
+def _revision_body_flat(body):
+    """Merge nested filter objects (some clients POST { filter: { ... } })."""
+    if not isinstance(body, dict):
+        return {}
+    out = dict(body)
+    for key in ("filter", "filters", "request"):
+        nested = body.get(key)
+        if isinstance(nested, dict):
+            for k, v in nested.items():
+                if k not in out or out.get(k) in (None, [], ""):
+                    out[k] = v
+    return out
+
+
 def _collect_question_edges_from_body(body, curriculum_year_key=None):
-    """Normalize revision/adaptive exam POST body."""
+    """Normalize revision/adaptive exam POST body (must scope by curriculum year when provided)."""
+    body = _revision_body_flat(body or {})
     theme_id = (body.get("themeId") or body.get("theme_id") or body.get("theme") or "").strip() or None
     chapter_id = (body.get("chapterId") or body.get("chapter_id") or body.get("chapter") or "").strip() or None
     chapters_ids = body.get("chaptersIds") or body.get("chapters_ids") or []
@@ -1631,13 +1646,28 @@ def _collect_question_edges_from_body(body, curriculum_year_key=None):
     courses_ids = body.get("coursesIds") or body.get("courses_ids") or body.get("courses") or []
     if isinstance(courses_ids, str):
         courses_ids = [c.strip() for c in courses_ids.split(",")] if courses_ids else []
+    cid_one = body.get("courseId") or body.get("course_id")
+    if cid_one and not courses_ids:
+        courses_ids = [cid_one]
     sources_years = body.get("sourcesYears") or body.get("sources_years") or body.get("years") or []
+    yr = (
+        curriculum_year_key
+        or body.get("yearId")
+        or body.get("year_id")
+        or body.get("year")
+        or body.get("curriculumYear")
+        or body.get("curriculum_year")
+    )
+    if yr is not None and yr != "":
+        yr = str(yr).strip()
+    else:
+        yr = None
     return _collect_question_edges(
         theme_id=theme_id,
         chapters_ids=chapters_ids,
         courses_ids=courses_ids,
         sources_years=sources_years,
-        curriculum_year_key=curriculum_year_key,
+        curriculum_year_key=yr,
     )
 
 
@@ -1667,6 +1697,9 @@ def get_exam_replica_source(source_id):
     if exam_year and str(exam_year).replace("-", "").lstrip("-").isdigit():
         sy = [int(exam_year)]
     body = {"themeId": theme_id, "sourcesYears": sy}
+    yr = (request.args.get("yearId") or request.args.get("year_id") or "").strip()
+    if yr:
+        body["yearId"] = yr
     items_out = _collect_question_edges_from_body(body)
     return jsonify({"items": items_out, "totalQuestionsCounter": len(items_out)})
 
@@ -1802,47 +1835,18 @@ def post_answers():
 
 @app.route('/api/v1/cards', methods=['POST'])
 def post_cards():
-    """Wrong answer → Memorix card (utils-fK4_zk7F). Body: { questionId }."""
-    body = request.get_json(silent=True) or {}
-    qid = body.get("questionId") or body.get("id")
-    return jsonify({
-        "id": str(uuid.uuid4())[:16],
-        "questionId": qid,
-    }), 201
+    """Memorix disabled in mirror (no-op)."""
+    return jsonify({"ok": True}), 200
 
 
 @app.route('/api/v1/cards/due/<path:theme_slug>', methods=['GET'])
 def get_cards_due_for_theme(theme_slug):
-    """MemorixPage: GET `${J('cards')}/due/${themeId}` → array of { id, question }."""
-    theme_slug_norm = (theme_slug or "").strip().lower()
-    data = load_data()
-    cards = []
-    for year_data in data.values():
-        for item in _year_items(year_data):
-            if not isinstance(item, dict) or not _question_in_memorix_queue(item):
-                continue
-            meta = item.get("meta", item)
-            tname = meta.get("theme") or meta.get("theme_label") or "Unknown"
-            if _theme_name_to_slug(tname) != theme_slug_norm:
-                continue
-            qid = _question_id(item)
-            if not qid:
-                continue
-            pq = _prepare_question_dict(item)
-            if not pq:
-                continue
-            pq["notes"] = _question_notes_merged_for_api(item, pq)
-            pq.setdefault("done", False)
-            pq.setdefault("correct", None)
-            pq.setdefault("answerStatus", None)
-            pq.setdefault("answer", None)
-            cards.append({"id": f"card-{qid}", "question": pq})
-    return jsonify(cards)
+    """Memorix disabled — empty queue."""
+    return jsonify([])
 
 
 @app.route('/api/v1/cards/<path:card_id>', methods=['PATCH', 'PUT', 'DELETE'])
 def patch_or_delete_card(card_id):
-    """MemorixCard: PATCH { score } after reveal; DELETE removes card from queue."""
     if request.method == "DELETE":
         return "", 204
     return jsonify({"success": True, "id": card_id})
@@ -1850,9 +1854,7 @@ def patch_or_delete_card(card_id):
 
 @app.route('/api/v1/playlists/pinned', methods=['GET'])
 def get_playlists_pinned():
-    # Pinned strip on revision uses this; must list same pinned IDs as in /playlists or addQuestionToPinnedPlaylist breaks
     pinned = [pl for pl in _runtime_playlists if pl.get("pinned")]
-    pinned.extend([pl for pl in SAMPLE_PLAYLISTS if pl.get("pinned")])
     return jsonify(pinned)
 
 
@@ -1896,12 +1898,6 @@ def _note_apply_patch(note, new_value):
 _runtime_notes_v2 = defaultdict(list)
 
 
-def _theme_name_to_slug(theme_name):
-    if theme_name is None:
-        return ""
-    return str(theme_name).lower().replace(" ", "_").replace("'", "")
-
-
 def _embedded_notes_list(item):
     if not isinstance(item, dict):
         return []
@@ -1910,16 +1906,6 @@ def _embedded_notes_list(item):
         return []
     notes = q.get("notes")
     return notes if isinstance(notes, list) else []
-
-
-def _question_in_memorix_queue(item):
-    """Memorix only lists questions the user added notes to here (POST /api/v1/notes/note or v2 notes). Scraped empty notes: [] does not count."""
-    if not isinstance(item, dict):
-        return False
-    qid = _question_id(item)
-    if qid is None:
-        return False
-    return bool(_runtime_notes_v2.get(str(qid)))
 
 
 def _question_notes_merged_for_api(item, pq):
@@ -1941,57 +1927,12 @@ def _question_notes_merged_for_api(item, pq):
 
 @app.route('/api/v2/cards/themes/top', methods=['GET'])
 def get_cards_themes_top():
-    """MemorixTopThemesCard: same rule as /themes/due — only themes with ≥1 question that has notes."""
-    data = load_data()
-    themes = []
-    for year_key, year_data in data.items():
-        items = _year_items(year_data)
-        if not items:
-            continue
-        themes_counts = defaultdict(int)
-        for item in items:
-            if isinstance(item, dict) and _question_in_memorix_queue(item):
-                meta = item.get("meta", item)
-                theme = meta.get("theme", meta.get("theme_label", "Unknown"))
-                themes_counts[theme] += 1
-        for theme_name, n in themes_counts.items():
-            themes.append({
-                "id": _theme_name_to_slug(theme_name),
-                "name": theme_name,
-                "newCount": min(n, 10),
-                "reviewCount": n,
-                "displayCount": n,
-            })
-    return jsonify({"themes": themes[:20]})
+    """Memorix disabled."""
+    return jsonify({"themes": []})
 
 
-# Sample data so sidebar pages show content instead of empty
-SAMPLE_SESSIONS = [
-    {
-        "id": "sample-session-1",
-        "title": "Révision 1ère année",
-        "lastOpened": "2025-02-20T10:00:00Z",
-        "status": "active",
-        "totalQuestions": 42,
-        "totalCases": 0,
-        "totalCasesQuestions": 0,
-        "answerSets": [{"id": "local-answer-set-1", "sessionId": "sample-session-1"}],
-        "canAccess": True,
-        "itemsOrderDirection": "asc",
-    },
-    {
-        "id": "sample-session-2",
-        "title": "Anatomie – thème 1",
-        "lastOpened": "2025-02-19T14:30:00Z",
-        "status": "active",
-        "totalQuestions": 25,
-        "totalCases": 0,
-        "totalCasesQuestions": 0,
-        "answerSets": [{"id": "local-answer-set-2", "sessionId": "sample-session-2"}],
-        "canAccess": True,
-        "itemsOrderDirection": "desc",
-    },
-]
+# No bundled sample sessions — users only see sessions they create.
+SAMPLE_SESSIONS = []
 
 
 def _all_question_raw_items_ordered(limit=None):
@@ -2009,8 +1950,8 @@ def _all_question_raw_items_ordered(limit=None):
 
 def _items_matching_session_option(opt, datum):
     """One row from FilterForm session options[].request."""
-    year_id = opt.get("yearId")
-    theme_id = opt.get("themeId")
+    year_id = opt.get("yearId") or opt.get("year_id") or opt.get("year")
+    theme_id = opt.get("themeId") or opt.get("theme_id")
     filter_by = (opt.get("filterBy") or "theme").lower()
     chapters_ids = opt.get("chaptersIds") or []
     courses_ids = opt.get("coursesIds") or []
@@ -2064,31 +2005,26 @@ def _items_matching_session_option(opt, datum):
 
 
 def _session_raw_items(session_id):
-    """Ordered raw question rows for a session (SessionPage items)."""
+    """Ordered raw question rows for a session (SessionPage items). Filters only — no bulk fallback."""
     data = load_data()
-    sample_ids = {s["id"] for s in SAMPLE_SESSIONS}
     if session_id in _runtime_sessions:
         opts = _runtime_sessions[session_id].get("options") or []
-        if opts:
-            seen = []
-            seen_ids = set()
-            for opt in opts:
-                for item in _items_matching_session_option(opt, data):
-                    qid = _question_id(item)
-                    key = str(qid) if qid else None
-                    if key and key not in seen_ids:
-                        seen_ids.add(key)
-                        seen.append(item)
-            if seen:
-                return seen
-        return _all_question_raw_items_ordered(200)
-    if session_id == "sample-session-1":
-        return _all_question_raw_items_ordered(42)
-    if session_id == "sample-session-2":
-        return _all_question_raw_items_ordered(25)
-    if session_id not in sample_ids:
-        return []
-    return _all_question_raw_items_ordered(50)
+        if not opts:
+            return []
+        seen = []
+        seen_ids = set()
+        for opt in opts:
+            opt = _revision_body_flat(opt) if isinstance(opt, dict) else opt
+            if not isinstance(opt, dict):
+                continue
+            for item in _items_matching_session_option(opt, data):
+                qid = _question_id(item)
+                key = str(qid) if qid else None
+                if key and key not in seen_ids:
+                    seen_ids.add(key)
+                    seen.append(item)
+        return seen
+    return []
 
 
 def _session_question_payload(raw):
@@ -2151,35 +2087,8 @@ def _empty_playlist(**kwargs):
     return base
 
 
-# Pinned + unpinned: real /playlists returns only non-pinned edges; /pinned returns pinned (no duplicate IDs in UI)
-SAMPLE_PLAYLISTS = [
-    _empty_playlist(
-        id="sample-playlist-1",
-        label="Favoris révision",
-        description="Questions à revoir avant l’examen",
-        questionsCount=30,
-        totalQuestionsCount=30,
-        pinned=True,
-    ),
-    _empty_playlist(
-        id="sample-playlist-2",
-        label="Points difficiles",
-        description="QCM où j’ai fait des erreurs",
-        questionsCount=15,
-        clinicalCasesCount=2,
-        clinicalCasesQuestionsCount=4,
-        totalQuestionsCount=19,
-        pinned=True,
-    ),
-    _empty_playlist(id="sample-pl-u1", label="23 chir", pinned=False),
-    _empty_playlist(id="sample-pl-u2", label="23 médical", pinned=False),
-    _empty_playlist(id="sample-pl-u3", label="24 chir", pinned=False),
-    _empty_playlist(id="sample-pl-u4", label="24 médical", pinned=False),
-    _empty_playlist(id="sample-pl-u5", label="25 A CHIR", pinned=False),
-    _empty_playlist(id="sample-pl-u6", label="25 B BIOLOGIE", pinned=False),
-    _empty_playlist(id="sample-pl-u7", label="25 C PCM", pinned=False),
-    _empty_playlist(id="sample-pl-u8", label="26 R2C", pinned=False),
-]
+# No bundled playlists — new accounts start empty; only POST-created playlists appear.
+SAMPLE_PLAYLISTS = []
 
 # Playlists created via POST /api/v1/playlists/playlist (persists until server restart)
 _runtime_playlists = []
@@ -2213,8 +2122,7 @@ def _playlist_contains_clinical_case(pl, case_id):
 
 
 SAMPLE_ACTIVITY_EDGES = [
-    {"label": "session", "name": "Révision 1ère année", "correct": 12, "partiallyCorrect": 3, "incorrect": 2},
-    {"label": "memorix", "name": "Anatomie", "correct": 8, "partiallyCorrect": 1, "incorrect": 1},
+    {"label": "session", "name": "Révision", "correct": 0, "partiallyCorrect": 0, "incorrect": 0},
 ]
 
 
@@ -2358,46 +2266,16 @@ def post_answer_sets():
     })
 
 
-# ----- Memorix (v2) – themes/due so MemorixPage shows structure -----
-def _memorix_due_themes():
-    """Themes that have at least one question with notes (same idea as prod Memorix queue)."""
-    data = load_data()
-    result = {}
-    for year_key, year_data in data.items():
-        items = _year_items(year_data)
-        if not items:
-            continue
-        themes_counts = defaultdict(int)
-        for item in items:
-            if isinstance(item, dict) and _question_in_memorix_queue(item):
-                meta = item.get("meta", item)
-                theme = meta.get("theme", meta.get("theme_label", "Unknown"))
-                themes_counts[theme] += 1
-        year_label = year_key  # e.g. "1st", "2nd"
-        rows = [
-            {
-                "id": _theme_name_to_slug(theme_name),
-                "name": theme_name,
-                "count": str(n),
-                "yearLabel": year_label,
-            }
-            for theme_name, n in sorted(themes_counts.items(), key=lambda x: (x[0] or ""))
-        ]
-        if rows:
-            result[year_label] = rows
-    return result
-
-
 @app.route('/api/v1/themes/due', methods=['GET'])
 def get_v1_themes_due():
-    # MemorixPage calls J("themes") + "/due" → /api/v1/themes/due (same payload as prod)
-    return jsonify(_memorix_due_themes())
+    """Memorix disabled."""
+    return jsonify({})
 
 
 @app.route('/api/v2/themes/due', methods=['GET'])
 def get_themes_due():
-    # MemorixPage expects { "<yearLabel>": [ { id, name, count, yearLabel } ], ... }
-    return jsonify(_memorix_due_themes())
+    """Memorix disabled."""
+    return jsonify({})
 
 
 @app.route('/api/v2/cards/modules/<module_id>', methods=['DELETE'])
