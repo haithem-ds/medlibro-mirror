@@ -202,10 +202,6 @@ const SessionsPage = {
     template: `<v-app><app-bar></app-bar><v-main><v-container><h1>Sessions</h1></v-container></v-main></v-app>`
 };
 
-const MemorixPage = {
-    template: `<v-app><app-bar></app-bar><v-main><v-container><h1>Memorix</h1></v-container></v-main></v-app>`
-};
-
 const PrioritizerPage = {
     template: `<v-app><app-bar></app-bar><v-main><v-container><h1>Prioritizer</h1></v-container></v-main></v-app>`
 };
@@ -262,7 +258,6 @@ const routes = [
     { path: '/courses', component: CoursesPage },
     { path: '/playlists', component: PlaylistsPage },
     { path: '/sessions', component: SessionsPage },
-    { path: '/memorix', component: MemorixPage },
     { path: '/prioritizer', component: PrioritizerPage },
     { path: '/pricing', component: PricingPage },
     { path: '/faq', component: FAQPage },

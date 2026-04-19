@@ -126,6 +126,135 @@ YEAR_LABELS = {
 _HEAVY_YEAR_KEYS = frozenset({"4th", "5th", "6th"})
 
 
+def _resolve_curriculum_year_key(yr):
+    """Normalize UI value to a curriculum key present in active_year_mapping (1st, 2nd, …)."""
+    if yr is None or yr == "":
+        return None
+    if isinstance(yr, bool):
+        return None
+    # Plain 1990–2100 values are QCM exam years in many client payloads — not curriculum slugs.
+    if isinstance(yr, (int, float)):
+        yi = int(yr)
+        if 1990 <= yi <= 2100:
+            return None
+    s = str(yr).strip()
+    if s.isdigit():
+        yi = int(s)
+        if 1990 <= yi <= 2100:
+            return None
+    allowed = active_year_mapping()
+    if s in allowed:
+        return s
+    sl = s.lower()
+    for k in allowed.keys():
+        if sl == str(k).lower():
+            return k
+    for k, fn in allowed.items():
+        stem = Path(fn).stem
+        if sl == stem.lower() or sl == str(fn).lower():
+            return k
+    for k, lbl in YEAR_LABELS.items():
+        if k in allowed and (sl == str(lbl).lower() or s == lbl):
+            return k
+    return s
+
+
+def _exam_years_from_value(val):
+    """Parse QCM exam years (2018, …) from int, '2018', 'source-2018', {id: 'source-2018'}."""
+    out = []
+    if val is None or isinstance(val, bool):
+        return out
+    if isinstance(val, dict):
+        val = val.get("id") or val.get("year") or val.get("value") or val.get("label")
+        if val is None:
+            return out
+    if isinstance(val, (int, float)):
+        y = int(val)
+        if 1990 <= y <= 2100:
+            out.append(y)
+        return out
+    s = str(val).strip()
+    if not s:
+        return out
+    m = re.search(r"(?:source-)?(\d{4})\b", s)
+    if m:
+        y = int(m.group(1))
+        if 1990 <= y <= 2100:
+            out.append(y)
+        return out
+    if s.replace("-", "").lstrip("-").isdigit():
+        try:
+            y = int(s)
+            if 1990 <= y <= 2100:
+                out.append(y)
+        except ValueError:
+            pass
+    return out
+
+
+def _merged_exam_source_years(body):
+    """Merge exam-year filters from sourcesYears, years, sources[], source-2018, etc."""
+    acc = []
+    if not isinstance(body, dict):
+        return acc
+    for key in ("sourcesYears", "sources_years", "sourceYears", "years", "examYears", "selectedExamYears", "qcmYears"):
+        v = body.get(key)
+        if v is None:
+            continue
+        if isinstance(v, (list, tuple, set)):
+            for it in v:
+                acc.extend(_exam_years_from_value(it))
+        elif isinstance(v, str):
+            for part in re.split(r"[\s,;]+", v.strip()):
+                acc.extend(_exam_years_from_value(part))
+        else:
+            acc.extend(_exam_years_from_value(v))
+    for key in ("sources", "sourceIds", "selectedSources", "examSources", "selectedSourceIds"):
+        for it in (body.get(key) or []):
+            acc.extend(_exam_years_from_value(it))
+    for key in ("sourceId", "examYear", "selectedSourceYear", "qcmYear"):
+        if body.get(key) is not None:
+            acc.extend(_exam_years_from_value(body.get(key)))
+    # Body field "year" is often the selected QCM year (2018, …), not curriculum.
+    if body.get("year") is not None:
+        acc.extend(_exam_years_from_value(body.get("year")))
+    seen = set()
+    out = []
+    for y in acc:
+        if y not in seen:
+            seen.add(y)
+            out.append(y)
+    return out
+
+
+def _item_exam_year_ints(meta, item):
+    """Flatten QCM exam years from meta.sourcesYears, question.sources, etc."""
+    iy = []
+    if isinstance(meta, dict):
+        for y in meta.get("sourcesYears") or []:
+            iy.extend(_exam_years_from_value(y))
+        if meta.get("sourceYear") is not None:
+            iy.extend(_exam_years_from_value(meta.get("sourceYear")))
+    if isinstance(item, dict):
+        q = item.get("question")
+        if isinstance(q, dict):
+            for y in q.get("sourcesYears") or []:
+                iy.extend(_exam_years_from_value(y))
+            if q.get("sourceYear") is not None:
+                iy.extend(_exam_years_from_value(q.get("sourceYear")))
+            for src in q.get("sources") or []:
+                iy.extend(_exam_years_from_value(src))
+            if q.get("year") is not None:
+                iy.extend(_exam_years_from_value(q.get("year")))
+    seen = set()
+    out = []
+    for y in iy:
+        if y not in seen:
+            seen.add(y)
+            out.append(y)
+    return out
+
+
 def _env_truthy(name: str) -> bool:
     v = (os.environ.get(name) or "").strip().lower()
     return v in ("1", "true", "yes", "on")
@@ -1569,14 +1698,12 @@ def _collect_question_edges(
         sy_list = [int(x) for x in str(sy_list).split(",") if str(x).strip().isdigit()]
     sy_set = set()
     for y in sy_list:
-        try:
-            sy_set.add(int(y))
-        except (TypeError, ValueError):
-            if isinstance(y, str) and y.replace("-", "").lstrip("-").isdigit():
-                sy_set.add(int(y))
+        for iy in _exam_years_from_value(y):
+            sy_set.add(iy)
+    ck = _resolve_curriculum_year_key(curriculum_year_key) if curriculum_year_key not in (None, "") else None
     items_out = []
     for year_key, year_data in data.items():
-        if curriculum_year_key is not None and curriculum_year_key != "" and str(year_key) != str(curriculum_year_key):
+        if ck is not None and ck != "" and str(year_key) != str(ck):
             continue
         for item in _year_items(year_data):
             if not isinstance(item, dict):
@@ -1604,13 +1731,7 @@ def _collect_question_edges(
                 if cid not in courses_norm and cslug not in cslugs and cslug not in courses_norm and cid not in cslugs:
                     continue
             if sy_set:
-                item_years = meta.get("sourcesYears") or []
-                iy = []
-                for y in item_years:
-                    try:
-                        iy.append(int(y))
-                    except (TypeError, ValueError):
-                        pass
+                iy = _item_exam_year_ints(meta, item)
                 if not any(y in sy_set for y in iy):
                     continue
             qid = _question_id(item)
@@ -1649,19 +1770,19 @@ def _collect_question_edges_from_body(body, curriculum_year_key=None):
     cid_one = body.get("courseId") or body.get("course_id")
     if cid_one and not courses_ids:
         courses_ids = [cid_one]
-    sources_years = body.get("sourcesYears") or body.get("sources_years") or body.get("years") or []
+    sources_years = _merged_exam_source_years(body)
     yr = (
         curriculum_year_key
         or body.get("yearId")
         or body.get("year_id")
-        or body.get("year")
+        or body.get("selectedYear")
+        or body.get("selectedYearId")
+        or body.get("educationYearId")
+        or body.get("curriculumYearId")
         or body.get("curriculumYear")
         or body.get("curriculum_year")
     )
-    if yr is not None and yr != "":
-        yr = str(yr).strip()
-    else:
-        yr = None
+    yr = _resolve_curriculum_year_key(yr) if yr not in (None, "") else None
     return _collect_question_edges(
         theme_id=theme_id,
         chapters_ids=chapters_ids,
@@ -1673,16 +1794,30 @@ def _collect_question_edges_from_body(body, curriculum_year_key=None):
 
 @app.route('/api/v1/revision', methods=['POST'])
 def post_revision():
-    """POST /api/v1/revision: body { locationId, themeId, chapterId, coursesIds[], sourcesYears[] }. Returns { items: [{ entity, id }], totalQuestionsCounter } for starting a revision session."""
+    """POST /api/v1/revision: body { yearId, themeId, chaptersIds[], coursesIds[], sources / sourcesYears[] }. Returns { items, totalQuestionsCounter }."""
     body = request.get_json(silent=True) or {}
+    if not isinstance(body, dict):
+        body = {}
+    if not (body.get("yearId") or body.get("year_id") or body.get("year")):
+        qy = request.args.get("yearId") or request.args.get("year_id") or request.args.get("year")
+        if qy:
+            body = dict(body)
+            body["yearId"] = qy.strip()
     items_out = _collect_question_edges_from_body(body)
     return jsonify({"items": items_out, "totalQuestionsCounter": len(items_out)})
 
 
 @app.route('/api/v1/exam', methods=['POST'])
 def post_exam_adaptive():
-    """Exam adaptive mode: POST { locationId, themeId, chaptersIds[], coursesIds[], sourcesYears[], thresholdPerChapter }."""
+    """Exam adaptive mode: POST with same filter fields as revision (+ exam source years)."""
     body = request.get_json(silent=True) or {}
+    if not isinstance(body, dict):
+        body = {}
+    if not (body.get("yearId") or body.get("year_id") or body.get("year")):
+        qy = request.args.get("yearId") or request.args.get("year_id") or request.args.get("year")
+        if qy:
+            body = dict(body)
+            body["yearId"] = qy.strip()
     items_out = _collect_question_edges_from_body(body)
     return jsonify({"items": items_out, "totalQuestionsCounter": len(items_out)})
 
@@ -1807,9 +1942,9 @@ def get_licenses_expiry():
 
 @app.route('/api/v2/answers/modules', methods=['GET'])
 def get_answers_modules():
-    # ActivityCard expects { edges: [{ label, name, correct, partiallyCorrect, incorrect }], pageInfo }
+    # Dashboard activity graph — no flashcard/streak edges in local mirror.
     return jsonify({
-        "edges": SAMPLE_ACTIVITY_EDGES,
+        "edges": [],
         "pageInfo": {"hasNextPage": False, "nextPage": None}
     })
 
@@ -1835,13 +1970,13 @@ def post_answers():
 
 @app.route('/api/v1/cards', methods=['POST'])
 def post_cards():
-    """Memorix disabled in mirror (no-op)."""
+    """Flashcards/Memorix disabled in mirror (no-op)."""
     return jsonify({"ok": True}), 200
 
 
 @app.route('/api/v1/cards/due/<path:theme_slug>', methods=['GET'])
 def get_cards_due_for_theme(theme_slug):
-    """Memorix disabled — empty queue."""
+    """Flashcards queue disabled — empty."""
     return jsonify([])
 
 
@@ -1927,7 +2062,7 @@ def _question_notes_merged_for_api(item, pq):
 
 @app.route('/api/v2/cards/themes/top', methods=['GET'])
 def get_cards_themes_top():
-    """Memorix disabled."""
+    """Flashcards themes disabled in mirror."""
     return jsonify({"themes": []})
 
 
@@ -1950,25 +2085,16 @@ def _all_question_raw_items_ordered(limit=None):
 
 def _items_matching_session_option(opt, datum):
     """One row from FilterForm session options[].request."""
-    year_id = opt.get("yearId") or opt.get("year_id") or opt.get("year")
+    yr_raw = opt.get("yearId") or opt.get("year_id") or opt.get("year")
+    year_filter = _resolve_curriculum_year_key(yr_raw) if yr_raw not in (None, "") else None
     theme_id = opt.get("themeId") or opt.get("theme_id")
     filter_by = (opt.get("filterBy") or "theme").lower()
     chapters_ids = opt.get("chaptersIds") or []
     courses_ids = opt.get("coursesIds") or []
-    sources_raw = opt.get("sources") or []
-    src_set = set()
-    for x in sources_raw:
-        try:
-            src_set.add(int(x))
-        except (TypeError, ValueError):
-            if isinstance(x, str) and x.strip().lstrip("-").isdigit():
-                try:
-                    src_set.add(int(x))
-                except ValueError:
-                    pass
+    src_set = set(_merged_exam_source_years(opt))
     out = []
     for year_key, year_data in datum.items():
-        if year_id is not None and year_id != "" and str(year_key) != str(year_id):
+        if year_filter is not None and year_filter != "" and str(year_key) != str(year_filter):
             continue
         for item in _year_items(year_data):
             if not isinstance(item, dict):
@@ -1997,8 +2123,8 @@ def _items_matching_session_option(opt, datum):
                 if cid not in courses_norm and cslug not in cslugs and cslug not in courses_norm and cid not in cslugs:
                     continue
             if src_set:
-                sy = meta.get("sourcesYears") or []
-                if not any(int(y) in src_set for y in sy if str(y).replace("-", "").isdigit()):
+                iy_flat = _item_exam_year_ints(meta, item)
+                if not any(y in src_set for y in iy_flat):
                     continue
             out.append(item)
     return out
@@ -2057,7 +2183,23 @@ def post_sessions():
     body = request.get_json(silent=True) or {}
     title = body.get("title") or "Session"
     sid = str(uuid.uuid4())[:8]
-    _runtime_sessions[sid] = {"title": title, "options": body.get("options") or []}
+    year_top = (
+        body.get("yearId")
+        or body.get("year_id")
+        or body.get("year")
+        or request.args.get("yearId")
+        or request.args.get("year_id")
+    )
+    opts_in = body.get("options") or []
+    opts_norm = []
+    for o in opts_in:
+        o = _revision_body_flat(o) if isinstance(o, dict) else o
+        if isinstance(o, dict):
+            o = dict(o)
+            if year_top and not (o.get("yearId") or o.get("year_id") or o.get("year")):
+                o["yearId"] = year_top
+        opts_norm.append(o)
+    _runtime_sessions[sid] = {"title": title, "options": opts_norm}
     n = len(_session_raw_items(sid))
     ans = f"as-{sid}"
     return jsonify({
@@ -2119,11 +2261,6 @@ def _playlist_contains_clinical_case(pl, case_id):
         if cid == case_id:
             return True
     return False
-
-
-SAMPLE_ACTIVITY_EDGES = [
-    {"label": "session", "name": "Révision", "correct": 0, "partiallyCorrect": 0, "incorrect": 0},
-]
 
 
 @app.route('/api/v2/sessions', methods=['GET'])
@@ -2268,13 +2405,13 @@ def post_answer_sets():
 
 @app.route('/api/v1/themes/due', methods=['GET'])
 def get_v1_themes_due():
-    """Memorix disabled."""
+    """Due themes (flashcards) disabled."""
     return jsonify({})
 
 
 @app.route('/api/v2/themes/due', methods=['GET'])
 def get_themes_due():
-    """Memorix disabled."""
+    """Due themes (flashcards) disabled."""
     return jsonify({})
 
 
@@ -2800,6 +2937,22 @@ try {
   }
   function start(){var n=0;var t=setInterval(function(){run();n++;if(n>50)clearInterval(t);},200);}
   if(document.readyState==='complete')start();else window.addEventListener('load',start);
+})();
+</script>
+<style id="medlibro-hide-memorix">a[href*="memorix"],a[href*="Memorix"],[data-route*="memorix"]{display:none!important}</style>
+<script>
+(function(){
+function hide(){
+  try{
+    document.querySelectorAll('a[href*="memorix"],a[href*="Memorix"]').forEach(function(el){el.style.display='none';});
+    document.querySelectorAll('.v-list-item,.v-tab,.v-btn,.v-navigation-drawer a').forEach(function(el){
+      var t=(el.textContent||'').trim();
+      if(/^memorix$/i.test(t)||t==='Memorix'){el.style.display='none';}
+    });
+  }catch(e){}
+}
+hide();
+try{new MutationObserver(function(){hide();}).observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
 })();
 </script>"""
         # Strategy: Remove ALL existing <script> tags in <head> that contain clearOld or auth logic
