@@ -482,7 +482,18 @@ def _strip_memorix_from_js_bundle(js: str) -> str:
     """Remove Vue-router routes and labels for Memorix/Mémorix from minified bundles."""
     if not _bundle_contains_memorix(js):
         return js
-    needles = ('path:"/memorix"', "path:'/memorix'", 'path:"/mémorix"', "path:'/mémorix'")
+    # Drop Memorix chunks from Vite dep arrays (quoted "assets/Memorix….js").
+    js = re.sub(r',"(?:assets/)?MemorixPage-[^"]+\.js"', "", js)
+    js = re.sub(r',"(?:assets/)?MemorixTopThemesCard-[^"]+\.js"', "", js)
+    js = re.sub(r'import\("\./MemorixPage-[^"]+\.js"\)', 'import("./index-BjaFTGv8.js")', js)
+    needles = (
+        'path:"/memorix"',
+        "path:'/memorix'",
+        'path:"/mémorix"',
+        "path:'/mémorix'",
+        'path:"/memorix/:themeId"',
+        "path:'/memorix/:themeId'",
+    )
     for needle in needles:
         for _ in range(80):
             if needle not in js:
@@ -529,6 +540,26 @@ def _strip_memorix_from_js_bundle(js: str) -> str:
     js = js.replace('path:"/memorix"', 'path:"/dashboard"')
     js = js.replace('"/mémorix"', '"/dashboard"')
     return js
+
+
+def _strip_memorix_from_clientlayout_js(js: str) -> str:
+    """Remove Memorix item from ClientLayout sidebar navigationItems (built SPA)."""
+    if not js or "memorix" not in js.lower():
+        return js
+    # Exact shape from stock ClientLayout (MedLibro): one nav object with to:"memorix".
+    js = re.sub(
+        r',\{to:"memorix",icon:"mdi-brain",title:"memorix",available:this\.isAuthenticated,'
+        r"disabled:!this\.isValid\|\|!this\.isPremium,new:!1,test:!1\}",
+        "",
+        js,
+        count=1,
+    )
+    return js
+
+
+def _memorix_stub_esm() -> str:
+    """Minimal Vue component stub so imports stay valid after Memorix chunks are gutted."""
+    return "export default{name:\"MLStub\",render:function(){return null}};\n"
 
 
 def _env_truthy(name: str) -> bool:
@@ -3056,12 +3087,35 @@ def serve(path):
     # Prevent path traversal
     if ".." in path or path.startswith("/"):
         path = ""
+    # Deep-link / bookmark to Memorix → dashboard (feature removed locally).
+    if path:
+        hit = path.split("?", 1)[0].strip("/").lower()
+        if hit == "memorix" or hit.startswith("memorix/"):
+            return redirect("/dashboard", code=302)
     # Always serve SPA for / so the marketing landing renders; client script sends logged-in users to /dashboard.
     # Static file?
     file_path = (MIRROR / path).resolve()
     if not str(file_path).startswith(str(MIRROR.resolve())):
         path = ""
     if path and file_path.is_file():
+        from flask import Response
+        # Gut Memorix-only lazy chunks (hash in filename); keeps dashboard import graph valid.
+        lp = path.replace("\\", "/").lower()
+        if (
+            path.startswith("assets/")
+            and path.endswith(".js")
+            and ("memorixpage-" in lp or "memorixtopthemescard-" in lp or "memorixmodule-" in lp)
+        ):
+            r = Response(_memorix_stub_esm(), mimetype="application/javascript")
+            r.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            return r
+        # Remove Memorix from sidebar navigation (built ClientLayout chunk).
+        if path.startswith("assets/ClientLayout-") and path.endswith(".js"):
+            js = file_path.read_text(encoding="utf-8", errors="replace")
+            js = _strip_memorix_from_clientlayout_js(js)
+            r = Response(js, mimetype="application/javascript")
+            r.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            return r
         # Patch SPA entry bundle (filename from index.html — hash varies per MedLibro release)
         if path == _spa_main_js_relpath():
             js = file_path.read_text(encoding="utf-8", errors="replace")
