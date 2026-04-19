@@ -251,6 +251,9 @@ def _merged_exam_source_years(body, depth=0):
         "qcmYears",
         "sourcesYear",
         "examSourcesYears",
+        # Stock app sometimes sends the picked exam year as selectedYear (numeric 2018–2100).
+        "selectedYear",
+        "selectedSourceYear",
     ):
         v = body.get(key)
         if v is None:
@@ -290,6 +293,10 @@ def _merged_exam_source_years(body, depth=0):
         "data",
         "criteria",
         "session",
+        "meta",
+        "context",
+        "attributes",
+        "option",
     ):
         nested = body.get(nest_key)
         if isinstance(nested, dict):
@@ -354,7 +361,7 @@ def _item_exam_year_ints(meta, item):
 _SESSION_FILTER_DEFAULT_KEYS = frozenset({
     "sourcesYears", "sources_years", "sourceYears", "years", "examYears", "selectedExamYears", "qcmYears",
     "sources", "sourceIds", "selectedSources", "examSources", "selectedSourceIds",
-    "sourceId", "examYear", "selectedSourceYear", "qcmYear", "year",
+    "sourceId", "examYear", "selectedSourceYear", "selectedSourceYears", "qcmYear", "year",
     "yearId", "year_id", "selectedYear", "selectedYearId", "educationYearId",
     "curriculumYearId", "curriculumYear", "curriculum_year",
 })
@@ -1810,7 +1817,9 @@ def post_sources():
 def post_sources_learn():
     """POST /api/v1/sources/learn: body { location, theme, chapters[], courses[] }. Returns [{ year: 2021 }, { year: 2020 }, ...] like MedLibro."""
     data = load_data()
-    body = request.get_json(silent=True) or {}
+    body = _request_json_dict()
+    body = _revision_body_merge_query(body)
+    body = _revision_body_flat(body)
     theme_id = (body.get("themeId") or body.get("theme_id") or body.get("theme") or "").strip() or None
     chapters = body.get("chaptersIds") or body.get("chapters_ids") or body.get("chapters") or []
     courses = body.get("coursesIds") or body.get("courses_ids") or body.get("courses") or []
@@ -1990,7 +1999,7 @@ def _revision_body_flat(body):
     if not isinstance(body, dict):
         return {}
     out = dict(body)
-    for key in ("filter", "filters", "request"):
+    for key in ("filter", "filters", "request", "payload", "criteria", "selection", "data"):
         nested = body.get(key)
         if isinstance(nested, dict):
             for k, v in nested.items():
@@ -2140,7 +2149,24 @@ def get_exam_replica_year_source(curriculum_year, exam_year):
     return jsonify({"items": items_out, "totalQuestionsCounter": len(items_out)})
 
 
-def _prepare_question_dict(raw):
+def _session_preferred_exam_years(session_id):
+    """Exam (QCM) years from stored session defaults + options — same sourcesYears as POST /revision on live site."""
+    rs = _runtime_sessions.get(session_id)
+    if not rs:
+        return None
+    defaults = rs.get("filter_defaults") or {}
+    opts = rs.get("options") or []
+    acc = []
+    for opt in opts:
+        merged = dict(defaults)
+        if isinstance(opt, dict):
+            merged.update(opt)
+        merged = _revision_body_flat(merged)
+        acc.extend(_merged_exam_source_years(merged))
+    return frozenset(acc) if acc else None
+
+
+def _prepare_question_dict(raw, preferred_exam_years=None):
     """Build MedLibro flat question dict from raw item (same shape as GET /api/v1/questions/:id)."""
     if not raw or not isinstance(raw, dict):
         return None
@@ -2164,7 +2190,21 @@ def _prepare_question_dict(raw):
     year_label = meta.get("year") or (YEAR_LABELS.get(str(meta.get("year"))) if isinstance(meta, dict) else None) or "2nd"
     years = meta.get("sourcesYears") if isinstance(meta, dict) else None
     year_id = (meta.get("yearId") or "").strip() if isinstance(meta, dict) else ""
-    if not year_id and years:
+    year_ints = []
+    if isinstance(years, list):
+        for y in years:
+            year_ints.extend(_exam_years_from_value(y))
+    chosen_year = None
+    if preferred_exam_years and year_ints:
+        inter = [y for y in year_ints if y in preferred_exam_years]
+        if inter:
+            chosen_year = min(inter)
+    if chosen_year is None and year_ints:
+        # Unfiltered / general: show latest exam year on card (matches typical sourcesYears ordering).
+        chosen_year = max(year_ints)
+    if chosen_year is not None:
+        year_id = str(chosen_year)
+    elif not year_id and years:
         year_id = str(years[0])
     q["theme"] = {
         "id": theme_id,
@@ -2366,6 +2406,9 @@ def _all_question_raw_items_ordered(limit=None):
 
 def _items_matching_session_option(opt, datum):
     """One row from FilterForm session options[].request."""
+    opt = _revision_body_flat(opt) if isinstance(opt, dict) else opt
+    if not isinstance(opt, dict):
+        return []
     yr_raw = opt.get("yearId") or opt.get("year_id") or opt.get("year")
     year_filter = _resolve_curriculum_year_key(yr_raw) if yr_raw not in (None, "") else None
     theme_id = opt.get("themeId") or opt.get("theme_id")
@@ -2439,8 +2482,9 @@ def _session_raw_items(session_id):
     return []
 
 
-def _session_question_payload(raw):
-    q = _prepare_question_dict(raw)
+def _session_question_payload(raw, session_id=None):
+    pref = _session_preferred_exam_years(session_id) if session_id else None
+    q = _prepare_question_dict(raw, preferred_exam_years=pref)
     if not q:
         return None
     out = dict(q)
@@ -2602,7 +2646,7 @@ def get_session_items(session_id):
     _ = request.args.get("position", "0")
     items_out = []
     for raw in _session_raw_items(session_id):
-        pq = _session_question_payload(raw)
+        pq = _session_question_payload(raw, session_id=session_id)
         if pq:
             items_out.append(pq)
     total = len(items_out)
