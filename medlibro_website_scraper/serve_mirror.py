@@ -235,6 +235,13 @@ def _item_exam_year_ints(meta, item):
             iy.extend(_exam_years_from_value(y))
         if meta.get("sourceYear") is not None:
             iy.extend(_exam_years_from_value(meta.get("sourceYear")))
+        for lbl_key in ("sourceLabel", "examSource", "sourceTitle", "rattLabel", "examLabel", "qcmSource"):
+            if meta.get(lbl_key):
+                iy.extend(_exam_years_from_value(meta.get(lbl_key)))
+        srcm = meta.get("sources")
+        if isinstance(srcm, list):
+            for x in srcm:
+                iy.extend(_exam_years_from_value(x))
     if isinstance(item, dict):
         q = item.get("question")
         if isinstance(q, dict):
@@ -246,6 +253,9 @@ def _item_exam_year_ints(meta, item):
                 iy.extend(_exam_years_from_value(src))
             if q.get("year") is not None:
                 iy.extend(_exam_years_from_value(q.get("year")))
+            for lbl_key in ("sourceLabel", "examSource", "sourceTitle", "rattLabel"):
+                if q.get(lbl_key):
+                    iy.extend(_exam_years_from_value(q.get(lbl_key)))
     seen = set()
     out = []
     for y in iy:
@@ -253,6 +263,89 @@ def _item_exam_year_ints(meta, item):
             seen.add(y)
             out.append(y)
     return out
+
+
+# Keys copied from POST /sessions body into each option so filters (e.g. sourcesYears) apply when the client only sends them once.
+_SESSION_FILTER_DEFAULT_KEYS = frozenset({
+    "sourcesYears", "sources_years", "sourceYears", "years", "examYears", "selectedExamYears", "qcmYears",
+    "sources", "sourceIds", "selectedSources", "examSources", "selectedSourceIds",
+    "sourceId", "examYear", "selectedSourceYear", "qcmYear", "year",
+    "yearId", "year_id", "selectedYear", "selectedYearId", "educationYearId",
+    "curriculumYearId", "curriculumYear", "curriculum_year",
+})
+
+
+def _session_filter_defaults(body):
+    if not isinstance(body, dict):
+        return {}
+    return {k: v for k, v in body.items() if k in _SESSION_FILTER_DEFAULT_KEYS}
+
+
+def _revision_body_merge_query(body):
+    """Merge relevant query-string params into POST body (clients sometimes send filters only as ?args)."""
+    from flask import request
+
+    body = dict(body or {})
+    for k in (
+        "yearId", "year_id", "selectedYear", "selectedYearId", "educationYearId",
+        "curriculumYearId", "curriculumYear", "curriculum_year",
+    ):
+        if body.get(k) in (None, ""):
+            v = request.args.get(k)
+            if v not in (None, ""):
+                body[k] = v.strip() if isinstance(v, str) else v
+    if not body.get("sourcesYears") and not body.get("sources"):
+        sy = request.args.getlist("sourcesYears") or request.args.getlist("sources_years")
+        if not sy:
+            ss = request.args.get("sourcesYears") or request.args.get("sources_years")
+            if ss:
+                sy = [x.strip() for x in re.split(r"[\s,;]+", str(ss).strip()) if x.strip()]
+        if sy:
+            body["sourcesYears"] = sy
+    return body
+
+
+def _strip_memorix_from_js_bundle(js: str) -> str:
+    """Remove Vue-router route objects for /memorix from minified bundles (no CSS hiding)."""
+    if "memorix" not in js.casefold():
+        return js
+    needles = ('path:"/memorix"', "path:'/memorix'")
+    for needle in needles:
+        for _ in range(80):
+            if needle not in js:
+                break
+            try:
+                i = js.index(needle)
+            except ValueError:
+                break
+            j = i
+            while j >= 0 and js[j] != "{":
+                j -= 1
+            if j < 0 or js[j] != "{":
+                break
+            start = j
+            depth = 0
+            end = None
+            for k in range(start, len(js)):
+                if js[k] == "{":
+                    depth += 1
+                elif js[k] == "}":
+                    depth -= 1
+                    if depth == 0:
+                        end = k + 1
+                        break
+            if end is None:
+                break
+            rm0 = start
+            if rm0 > 0 and js[rm0 - 1] == ",":
+                rm0 -= 1
+            elif end < len(js) and js[end] == ",":
+                end += 1
+            js = js[:rm0] + js[end:]
+    js = js.replace('"/memorix"', '"/dashboard"')
+    js = js.replace("'/memorix'", "'/dashboard'")
+    js = js.replace('path:"/memorix"', 'path:"/dashboard"')
+    return js
 
 
 def _env_truthy(name: str) -> bool:
@@ -1798,11 +1891,22 @@ def post_revision():
     body = request.get_json(silent=True) or {}
     if not isinstance(body, dict):
         body = {}
-    if not (body.get("yearId") or body.get("year_id") or body.get("year")):
-        qy = request.args.get("yearId") or request.args.get("year_id") or request.args.get("year")
+    body = _revision_body_merge_query(body)
+    has_ck = (
+        body.get("yearId")
+        or body.get("year_id")
+        or body.get("selectedYear")
+        or body.get("selectedYearId")
+        or body.get("educationYearId")
+        or body.get("curriculumYearId")
+        or body.get("curriculumYear")
+        or body.get("curriculum_year")
+    )
+    if not has_ck:
+        qy = request.args.get("yearId") or request.args.get("year_id")
         if qy:
             body = dict(body)
-            body["yearId"] = qy.strip()
+            body["yearId"] = str(qy).strip()
     items_out = _collect_question_edges_from_body(body)
     return jsonify({"items": items_out, "totalQuestionsCounter": len(items_out)})
 
@@ -1813,13 +1917,38 @@ def post_exam_adaptive():
     body = request.get_json(silent=True) or {}
     if not isinstance(body, dict):
         body = {}
-    if not (body.get("yearId") or body.get("year_id") or body.get("year")):
-        qy = request.args.get("yearId") or request.args.get("year_id") or request.args.get("year")
+    body = _revision_body_merge_query(body)
+    has_ck = (
+        body.get("yearId")
+        or body.get("year_id")
+        or body.get("selectedYear")
+        or body.get("selectedYearId")
+        or body.get("educationYearId")
+        or body.get("curriculumYearId")
+        or body.get("curriculumYear")
+        or body.get("curriculum_year")
+    )
+    if not has_ck:
+        qy = request.args.get("yearId") or request.args.get("year_id")
         if qy:
             body = dict(body)
-            body["yearId"] = qy.strip()
+            body["yearId"] = str(qy).strip()
     items_out = _collect_question_edges_from_body(body)
     return jsonify({"items": items_out, "totalQuestionsCounter": len(items_out)})
+
+
+@app.route('/api/v2/revision', methods=['GET', 'POST'])
+def revision_v2():
+    """Stock SPA often calls v2 revision — delegate to v1."""
+    if request.method == 'GET':
+        return get_revision()
+    return post_revision()
+
+
+@app.route('/api/v2/exam', methods=['POST'])
+def exam_v2():
+    """Stock SPA may POST exam filters to v2."""
+    return post_exam_adaptive()
 
 
 @app.route('/api/v1/exam/source/<path:source_id>', methods=['GET'])
@@ -2044,7 +2173,7 @@ def _embedded_notes_list(item):
 
 
 def _question_notes_merged_for_api(item, pq):
-    """Attach embedded + runtime notes to prepared question dict (for Memorix card payload)."""
+    """Attach embedded + runtime notes to prepared question dict."""
     qid = _question_id(item)
     embedded = pq.get("notes") if isinstance(pq.get("notes"), list) else []
     out = list(embedded)
@@ -2134,7 +2263,9 @@ def _session_raw_items(session_id):
     """Ordered raw question rows for a session (SessionPage items). Filters only — no bulk fallback."""
     data = load_data()
     if session_id in _runtime_sessions:
-        opts = _runtime_sessions[session_id].get("options") or []
+        rs = _runtime_sessions[session_id]
+        opts = rs.get("options") or []
+        defaults = rs.get("filter_defaults") or {}
         if not opts:
             return []
         seen = []
@@ -2143,7 +2274,10 @@ def _session_raw_items(session_id):
             opt = _revision_body_flat(opt) if isinstance(opt, dict) else opt
             if not isinstance(opt, dict):
                 continue
-            for item in _items_matching_session_option(opt, data):
+            merged = dict(defaults)
+            merged.update(opt)
+            merged = _revision_body_flat(merged)
+            for item in _items_matching_session_option(merged, data):
                 qid = _question_id(item)
                 key = str(qid) if qid else None
                 if key and key not in seen_ids:
@@ -2183,23 +2317,40 @@ def post_sessions():
     body = request.get_json(silent=True) or {}
     title = body.get("title") or "Session"
     sid = str(uuid.uuid4())[:8]
+    # Curriculum year only — never use body["year"] here (often the selected QCM year, e.g. 2023).
     year_top = (
         body.get("yearId")
         or body.get("year_id")
-        or body.get("year")
+        or body.get("selectedYear")
+        or body.get("selectedYearId")
+        or body.get("educationYearId")
+        or body.get("curriculumYearId")
+        or body.get("curriculumYear")
+        or body.get("curriculum_year")
         or request.args.get("yearId")
         or request.args.get("year_id")
     )
+    filter_defaults = _session_filter_defaults(body)
     opts_in = body.get("options") or []
     opts_norm = []
     for o in opts_in:
         o = _revision_body_flat(o) if isinstance(o, dict) else o
         if isinstance(o, dict):
             o = dict(o)
-            if year_top and not (o.get("yearId") or o.get("year_id") or o.get("year")):
+            if year_top and not (
+                o.get("yearId")
+                or o.get("year_id")
+                or o.get("selectedYear")
+                or o.get("curriculumYear")
+                or o.get("curriculum_year")
+            ):
                 o["yearId"] = year_top
         opts_norm.append(o)
-    _runtime_sessions[sid] = {"title": title, "options": opts_norm}
+    _runtime_sessions[sid] = {
+        "title": title,
+        "options": opts_norm,
+        "filter_defaults": filter_defaults,
+    }
     n = len(_session_raw_items(sid))
     ans = f"as-{sid}"
     return jsonify({
@@ -2742,6 +2893,7 @@ def serve(path):
                 'validateAccount(e){const{error:t,message:n}=await _n(`${J("auth")}/validate-account`,e,{withCredentials:!0});if(!t){const r=this.connectedUser;return r.status="valid",r.isValid=!0,r.isPremium=!0,r.subscription="premium",r.emailVerified=!0,r.email_verified=!0,r.accountValidated=!0,r.isEmailVerified=!0,r.email_validated=!0,r.validated=!0,this.connectedUser=r,{error:!1}}return{error:!0,message:n}}',
                 1,
             )
+            js = _strip_memorix_from_js_bundle(js)
             from flask import Response
             r = Response(js, mimetype="application/javascript")
             r.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -2842,6 +2994,17 @@ def serve(path):
             r = Response(js, mimetype="application/javascript")
             r.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
             return r
+        if path.startswith("assets/") and path.endswith(".js"):
+            try:
+                _raw = file_path.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                _raw = ""
+            if "memorix" in _raw.casefold():
+                _raw = _strip_memorix_from_js_bundle(_raw)
+                from flask import Response
+                r = Response(_raw, mimetype="application/javascript")
+                r.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+                return r
         return send_from_directory(MIRROR, path)
     # Never serve index.html for /assets/ - missing JS/CSS must 404 (not HTML)
     if path.startswith("assets/") or path.startswith("cf-fonts/"):
@@ -2937,22 +3100,6 @@ try {
   }
   function start(){var n=0;var t=setInterval(function(){run();n++;if(n>50)clearInterval(t);},200);}
   if(document.readyState==='complete')start();else window.addEventListener('load',start);
-})();
-</script>
-<style id="medlibro-hide-memorix">a[href*="memorix"],a[href*="Memorix"],[data-route*="memorix"]{display:none!important}</style>
-<script>
-(function(){
-function hide(){
-  try{
-    document.querySelectorAll('a[href*="memorix"],a[href*="Memorix"]').forEach(function(el){el.style.display='none';});
-    document.querySelectorAll('.v-list-item,.v-tab,.v-btn,.v-navigation-drawer a').forEach(function(el){
-      var t=(el.textContent||'').trim();
-      if(/^memorix$/i.test(t)||t==='Memorix'){el.style.display='none';}
-    });
-  }catch(e){}
-}
-hide();
-try{new MutationObserver(function(){hide();}).observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
 })();
 </script>"""
         # Strategy: Remove ALL existing <script> tags in <head> that contain clearOld or auth logic
