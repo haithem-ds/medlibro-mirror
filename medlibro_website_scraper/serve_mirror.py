@@ -8,7 +8,11 @@ launch_servers.bat, then the browser will open automatically (default http://loc
 
 Optional environment (Docker / Render):
   MEDLIBRO_DATA_DIR   — path to folder with 1st.json, 2nd.json, … (default: ../Data)
-  MEDLIBRO_STATE_DIR  — writable dir for mirror_users.json & mirror_sessions.json (default: this package dir)
+  MEDLIBRO_STATE_DIR  — writable dir for all mirror state (see below). If unset: uses /data/medlibro_state
+    when /data exists (mount a persistent disk there in Docker/Render), else the package directory.
+  State files: mirror_users.json, mirror_sessions.json, mirror_runtime_state.json (playlists, revision
+    sessions, highlights), medlibro_years_stats_cache.json. Set this to a mounted volume so deploys do
+    not erase accounts and playlists.
   PORT                — HTTP port for `python serve_mirror.py` (default: 8080; Render sets this for gunicorn)
 
   MEDLIBRO_YEAR_KEYS   — comma list overrides year set (e.g. all years for production tests).
@@ -85,8 +89,29 @@ def _path_from_env(name: str, default: Path) -> Path:
     return Path(raw).resolve() if raw else default
 
 
+def _resolve_state_dir() -> Path:
+    """Writable directory for all JSON state. Prefer explicit env, then /data (typical volume mount)."""
+    raw = (os.environ.get("MEDLIBRO_STATE_DIR") or "").strip()
+    if raw:
+        p = Path(raw).expanduser().resolve()
+        try:
+            p.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            pass
+        return p
+    data_root = Path("/data")
+    try:
+        if data_root.is_dir():
+            p = (data_root / "medlibro_state").resolve()
+            p.mkdir(parents=True, exist_ok=True)
+            return p
+    except OSError:
+        pass
+    return Path(__file__).parent.resolve()
+
+
 DATA_DIR = _path_from_env("MEDLIBRO_DATA_DIR", PROJECT.parent / "Data")
-_STATE_DIR = _path_from_env("MEDLIBRO_STATE_DIR", PROJECT)
+_STATE_DIR = _resolve_state_dir()
 try:
     _STATE_DIR.mkdir(parents=True, exist_ok=True)
 except OSError:
@@ -789,6 +814,7 @@ TOKEN_PREFIX = "mloc_"
 USERS_STORE_PATH = _STATE_DIR / "mirror_users.json"
 SESSIONS_STORE_PATH = _STATE_DIR / "mirror_sessions.json"
 YEARS_STATS_CACHE_PATH = _STATE_DIR / "medlibro_years_stats_cache.json"
+RUNTIME_STATE_PATH = _STATE_DIR / "mirror_runtime_state.json"
 SEED_USERS_PATH = PROJECT / "mirror_users_seed.json"
 
 _users_by_email = {}
@@ -982,7 +1008,10 @@ def _init_local_auth():
     _merge_seed_if_empty_store()
     _load_sessions_from_disk()
     n = len(_users_by_email)
-    print(f"[INFO] Local auth: {n} account(s) in {USERS_STORE_PATH.name}")
+    print(
+        f"[INFO] Local auth: {n} account(s) in {USERS_STORE_PATH.name} "
+        f"(state dir: {_STATE_DIR})"
+    )
     if n == 0:
         print(
             "[INFO] No accounts yet: sign up on /signup, or copy mirror_users_seed.json.example "
@@ -2757,6 +2786,7 @@ def post_sessions():
         "options": opts_norm,
         "filter_defaults": filter_defaults,
     }
+    _save_mirror_runtime_state()
     n = len(_session_raw_items(sid))
     ans = f"as-{sid}"
     return jsonify({
@@ -2789,8 +2819,64 @@ def _empty_playlist(**kwargs):
 # No bundled playlists — new accounts start empty; only POST-created playlists appear.
 SAMPLE_PLAYLISTS = []
 
-# Playlists created via POST /api/v1/playlists/playlist (persists until server restart)
+# Playlists + revision session state — persisted to RUNTIME_STATE_PATH.
 _runtime_playlists = []
+
+_runtime_state_lock = threading.Lock()
+
+
+def _load_mirror_runtime_state():
+    """Restore playlists, study sessions, and highlights from disk (survives deploy when STATE_DIR is on a volume)."""
+    global _runtime_sessions, _runtime_session_highlights, _runtime_playlists
+    if not RUNTIME_STATE_PATH.exists():
+        return
+    try:
+        raw = RUNTIME_STATE_PATH.read_text(encoding="utf-8")
+        o = json.loads(raw)
+        if not isinstance(o, dict):
+            return
+        if isinstance(o.get("revisionSessions"), dict):
+            _runtime_sessions = {
+                str(k): v for k, v in o["revisionSessions"].items() if isinstance(v, dict)
+            }
+        if isinstance(o.get("sessionHighlights"), dict):
+            _runtime_session_highlights = {
+                str(k): v for k, v in o["sessionHighlights"].items()
+            }
+        if isinstance(o.get("playlists"), list):
+            _runtime_playlists = [p for p in o["playlists"] if isinstance(p, dict)]
+        np = len(_runtime_playlists)
+        ns = len(_runtime_sessions)
+        print(
+            f"[INFO] Loaded runtime state from {RUNTIME_STATE_PATH.name}: "
+            f"{np} playlist(s), {ns} revision session(s)."
+        )
+    except Exception as ex:
+        print(f"[WARN] Could not load {RUNTIME_STATE_PATH}: {ex}")
+
+
+def _save_mirror_runtime_state():
+    """Atomic JSON write so playlists/sessions/highlights survive restarts."""
+    payload = {
+        "version": 1,
+        "revisionSessions": _runtime_sessions,
+        "sessionHighlights": _runtime_session_highlights,
+        "playlists": _runtime_playlists,
+    }
+    try:
+        with _runtime_state_lock:
+            RUNTIME_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            tmp = RUNTIME_STATE_PATH.with_suffix(".tmp")
+            tmp.write_text(
+                json.dumps(payload, indent=2, ensure_ascii=False),
+                encoding="utf-8",
+            )
+            tmp.replace(RUNTIME_STATE_PATH)
+    except OSError as ex:
+        print(f"[WARN] Could not save {RUNTIME_STATE_PATH}: {ex}")
+
+
+_load_mirror_runtime_state()
 
 
 def _find_playlist(playlist_id):
@@ -2934,6 +3020,11 @@ def patch_session(session_id):
 
 @app.route('/api/v2/sessions/<session_id>', methods=['DELETE'])
 def delete_session(session_id):
+    sid = str(session_id)
+    if sid in _runtime_sessions:
+        del _runtime_sessions[sid]
+        _runtime_session_highlights.pop(sid, None)
+        _save_mirror_runtime_state()
     return "", 204
 
 
@@ -2941,12 +3032,13 @@ def delete_session(session_id):
 def session_highlights(session_id):
     """Save-to-playlist / exam UI: highlights-BbN8vXOS syncs localStorage with this endpoint (v2)."""
     if request.method == 'GET':
-        h = _runtime_session_highlights.get(session_id) or {}
+        h = _runtime_session_highlights.get(str(session_id)) or {}
         return jsonify({"highlights": dict(h) if isinstance(h, dict) else {}})
     body = request.get_json(silent=True) or {}
     incoming = body.get("highlights")
     if isinstance(incoming, dict):
-        _runtime_session_highlights[session_id] = incoming
+        _runtime_session_highlights[str(session_id)] = incoming
+        _save_mirror_runtime_state()
     return jsonify({"success": True})
 
 
@@ -3133,6 +3225,7 @@ def post_playlist():
         "clinicalCases": [],
     }
     _runtime_playlists.insert(0, pl)
+    _save_mirror_runtime_state()
     return jsonify(pl), 201
 
 
@@ -3152,6 +3245,7 @@ def playlist_question(playlist_id, question_id):
             pl["questionsCount"] = int(pl.get("questionsCount") or 0) + 1
             if "totalQuestionsCount" in pl:
                 pl["totalQuestionsCount"] = int(pl.get("totalQuestionsCount") or 0) + 1
+        _save_mirror_runtime_state()
         return jsonify({"success": True})
     # DELETE
     new_qs = [q for q in qs if (q.get("id") if isinstance(q, dict) else q) != question_id]
@@ -3160,6 +3254,7 @@ def playlist_question(playlist_id, question_id):
         pl["questionsCount"] = max(0, int(pl.get("questionsCount") or 0) - 1)
         if "totalQuestionsCount" in pl:
             pl["totalQuestionsCount"] = max(0, int(pl.get("totalQuestionsCount") or 0) - 1)
+        _save_mirror_runtime_state()
     return jsonify({"success": True})
 
 
@@ -3178,6 +3273,7 @@ def playlist_clinical_case(playlist_id, case_id):
             pl["clinicalCasesCount"] = int(pl.get("clinicalCasesCount") or 0) + 1
             if "totalQuestionsCount" in pl:
                 pl["totalQuestionsCount"] = int(pl.get("totalQuestionsCount") or 0) + 1
+        _save_mirror_runtime_state()
         return jsonify({"success": True})
     new_cs = [c for c in cs if (c.get("id") if isinstance(c, dict) else c) != case_id]
     if len(new_cs) != len(cs):
@@ -3185,6 +3281,7 @@ def playlist_clinical_case(playlist_id, case_id):
         pl["clinicalCasesCount"] = max(0, int(pl.get("clinicalCasesCount") or 0) - 1)
         if "totalQuestionsCount" in pl:
             pl["totalQuestionsCount"] = max(0, int(pl.get("totalQuestionsCount") or 0) - 1)
+        _save_mirror_runtime_state()
     return jsonify({"success": True})
 
 

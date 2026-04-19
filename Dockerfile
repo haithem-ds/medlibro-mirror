@@ -16,6 +16,8 @@ COPY medlibro_website_scraper/ .
 # For full curriculum on tiny RAM, build JSONL locally and set MEDLIBRO_PREFER_JSONL=1, or use build_jsonl in CI without --drop-json.
 
 RUN mkdir -p /data
+# Mount a persistent volume on /data (Render disk, docker -v) so mirror_users.json, mirror_runtime_state.json, etc. survive redeploys.
+VOLUME ["/data"]
 
 EXPOSE 8080
 

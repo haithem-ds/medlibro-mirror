@@ -7,7 +7,7 @@ This repo is laid out for a **Docker** deploy: `Data/` (question JSON) plus `med
 | Variable | Purpose | Default (local) |
 |----------|---------|-----------------|
 | `MEDLIBRO_DATA_DIR` | Folder with `1st.json`, … (and optional `*.jsonl`) | `/app/Data` in Docker |
-| `MEDLIBRO_STATE_DIR` | Writable folder for `mirror_users.json` and `mirror_sessions.json` | App folder |
+| `MEDLIBRO_STATE_DIR` | Writable folder for accounts, sessions, playlists, highlights, years cache (`mirror_users.json`, `mirror_sessions.json`, `mirror_runtime_state.json`, …). **Mount a persistent disk here** (Docker: often `/data`). If unset and `/data` exists, defaults to `/data/medlibro_state`; else the app folder. | See defaults |
 | `MEDLIBRO_YEAR_KEYS` | Comma list of keys to expose (e.g. `1st,2nd,3rd,4th,5th,6th,residency`). **Overrides** default and `MEDLIBRO_ALL_YEARS`. | *(see below)* |
 | `MEDLIBRO_ALL_YEARS` | Set to `1` / `true` to expose **full** curriculum (all keys in code). Ignored if `MEDLIBRO_YEAR_KEYS` is set. | **`0`** (off): default is **1st, 2nd, 3rd, residency** only (4th–6th omitted) for fast `json.load` + LRU on small instances |
 | `MEDLIBRO_PREFER_JSONL` | `1` / `true` if both `.json` and `.jsonl` exist: prefer streaming JSONL (lower peak RAM, slower). | **`0`**: prefer `.json` |
@@ -78,7 +78,7 @@ Optional: copy `medlibro_website_scraper/mirror_users_seed.json.example` to `mir
 1. **New** → **Web Service** → connect the GitHub repo.
 2. **Runtime**: Docker (Render will use the root `Dockerfile`).
 3. No extra env vars are required; `PORT` is injected by Render.
-4. **Ephemeral disk**: user signups live in `/data` in the container. On free tier, data can be lost on restarts. For durable accounts, add a **persistent disk** mounted at `/data` (paid feature) or accept ephemeral storage.
+4. **Ephemeral disk**: With the default Docker image, state is under `MEDLIBRO_STATE_DIR` (usually `/data`). Free tier may still lose disk on redeploy unless you attach a **persistent disk** mounted at `/data`. Playlists and revision sessions are stored in `mirror_runtime_state.json` alongside user files—keep the same volume across deploys.
 
 ## Local Docker
 
