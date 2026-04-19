@@ -192,32 +192,7 @@ def _exam_years_from_value(val):
     return out
 
 
-def _merged_exam_source_years(body):
-    """Merge exam-year filters from sourcesYears, years, sources[], source-2018, etc."""
-    acc = []
-    if not isinstance(body, dict):
-        return acc
-    for key in ("sourcesYears", "sources_years", "sourceYears", "years", "examYears", "selectedExamYears", "qcmYears"):
-        v = body.get(key)
-        if v is None:
-            continue
-        if isinstance(v, (list, tuple, set)):
-            for it in v:
-                acc.extend(_exam_years_from_value(it))
-        elif isinstance(v, str):
-            for part in re.split(r"[\s,;]+", v.strip()):
-                acc.extend(_exam_years_from_value(part))
-        else:
-            acc.extend(_exam_years_from_value(v))
-    for key in ("sources", "sourceIds", "selectedSources", "examSources", "selectedSourceIds"):
-        for it in (body.get(key) or []):
-            acc.extend(_exam_years_from_value(it))
-    for key in ("sourceId", "examYear", "selectedSourceYear", "qcmYear"):
-        if body.get(key) is not None:
-            acc.extend(_exam_years_from_value(body.get(key)))
-    # Body field "year" is often the selected QCM year (2018, …), not curriculum.
-    if body.get("year") is not None:
-        acc.extend(_exam_years_from_value(body.get("year")))
+def _dedupe_year_ints(acc):
     seen = set()
     out = []
     for y in acc:
@@ -225,6 +200,76 @@ def _merged_exam_source_years(body):
             seen.add(y)
             out.append(y)
     return out
+
+
+def _merged_exam_source_years(body, depth=0):
+    """Merge exam-year filters from flat keys and nested filter/request/options (stock SPA nests filters)."""
+    acc = []
+    if not isinstance(body, dict) or depth > 14:
+        return acc
+    for key in (
+        "sourcesYears",
+        "sources_years",
+        "sourceYears",
+        "years",
+        "examYears",
+        "selectedExamYears",
+        "qcmYears",
+        "sourcesYear",
+        "examSourcesYears",
+    ):
+        v = body.get(key)
+        if v is None:
+            continue
+        if isinstance(v, (list, tuple, set)):
+            for it in v:
+                if isinstance(it, dict):
+                    acc.extend(_merged_exam_source_years(it, depth + 1))
+                acc.extend(_exam_years_from_value(it))
+        elif isinstance(v, str):
+            for part in re.split(r"[\s,;]+", v.strip()):
+                acc.extend(_exam_years_from_value(part))
+        else:
+            acc.extend(_exam_years_from_value(v))
+    for key in ("sources", "sourceIds", "selectedSources", "examSources", "selectedSourceIds", "sourceList"):
+        for it in (body.get(key) or []):
+            if isinstance(it, dict):
+                acc.extend(_merged_exam_source_years(it, depth + 1))
+            acc.extend(_exam_years_from_value(it))
+    for key in ("sourceId", "examYear", "selectedSourceYear", "qcmYear"):
+        if body.get(key) is not None:
+            acc.extend(_exam_years_from_value(body.get(key)))
+    # Body field "year" is often the selected QCM year (2018, …), not curriculum.
+    if body.get("year") is not None:
+        acc.extend(_exam_years_from_value(body.get("year")))
+    # Nested payloads (Vue/Pinia often wrap filters here)
+    for nest_key in (
+        "filter",
+        "filters",
+        "request",
+        "payload",
+        "params",
+        "selection",
+        "input",
+        "variables",
+        "graphql",
+        "data",
+        "criteria",
+        "session",
+    ):
+        nested = body.get(nest_key)
+        if isinstance(nested, dict):
+            acc.extend(_merged_exam_source_years(nested, depth + 1))
+        elif isinstance(nested, list):
+            for el in nested:
+                if isinstance(el, dict):
+                    acc.extend(_merged_exam_source_years(el, depth + 1))
+    opts = body.get("options")
+    if isinstance(opts, list):
+        for el in opts:
+            if isinstance(el, dict):
+                acc.extend(_merged_exam_source_years(el, depth + 1))
+    return _dedupe_year_ints(acc)
 
 
 def _item_exam_year_ints(meta, item):
@@ -242,7 +287,13 @@ def _item_exam_year_ints(meta, item):
         if isinstance(srcm, list):
             for x in srcm:
                 iy.extend(_exam_years_from_value(x))
+        if isinstance(meta.get("source"), str):
+            iy.extend(_exam_years_from_value(meta.get("source")))
     if isinstance(item, dict):
+        for top_k in ("source", "sourceName", "sourceText", "sourceLabel", "rattSource"):
+            v = item.get(top_k)
+            if isinstance(v, str) and v.strip():
+                iy.extend(_exam_years_from_value(v))
         q = item.get("question")
         if isinstance(q, dict):
             for y in q.get("sourcesYears") or []:
@@ -278,7 +329,12 @@ _SESSION_FILTER_DEFAULT_KEYS = frozenset({
 def _session_filter_defaults(body):
     if not isinstance(body, dict):
         return {}
-    return {k: v for k, v in body.items() if k in _SESSION_FILTER_DEFAULT_KEYS}
+    d = {k: v for k, v in body.items() if k in _SESSION_FILTER_DEFAULT_KEYS}
+    # Whole nested filter blobs (sourcesYears often only under filter / request)
+    for k in ("filter", "filters", "request", "selection", "payload", "criteria"):
+        if isinstance(body.get(k), dict):
+            d[k] = body[k]
+    return d
 
 
 def _revision_body_merge_query(body):
@@ -286,6 +342,16 @@ def _revision_body_merge_query(body):
     from flask import request
 
     body = dict(body or {})
+    # Rare: filters sent as application/x-www-form-urlencoded instead of JSON
+    if request.form:
+        for fk in request.form.keys():
+            if body.get(fk) not in (None, "", []):
+                continue
+            vals = request.form.getlist(fk)
+            if len(vals) == 1:
+                body[fk] = vals[0]
+            elif len(vals) > 1:
+                body[fk] = vals
     for k in (
         "yearId", "year_id", "selectedYear", "selectedYearId", "educationYearId",
         "curriculumYearId", "curriculumYear", "curriculum_year",
@@ -305,11 +371,53 @@ def _revision_body_merge_query(body):
     return body
 
 
+_MEMORIX_RE = re.compile(r"m[eé]morix", re.IGNORECASE)
+
+
+def _bundle_contains_memorix(js: str) -> bool:
+    """Match Memorix / Mémorix in minified bundles."""
+    return _MEMORIX_RE.search(js or "") is not None
+
+
+def _strip_js_route_object_at_needle(js: str, needle: str) -> str:
+    """Remove outermost `{ ... needle ... }` balanced object starting at `{` before needle."""
+    for _ in range(80):
+        try:
+            i = js.index(needle)
+        except ValueError:
+            break
+        j = i
+        while j >= 0 and js[j] != "{":
+            j -= 1
+        if j < 0 or js[j] != "{":
+            break
+        start = j
+        depth = 0
+        end = None
+        for k in range(start, len(js)):
+            if js[k] == "{":
+                depth += 1
+            elif js[k] == "}":
+                depth -= 1
+                if depth == 0:
+                    end = k + 1
+                    break
+        if end is None:
+            break
+        rm0 = start
+        if rm0 > 0 and js[rm0 - 1] == ",":
+            rm0 -= 1
+        elif end < len(js) and js[end] == ",":
+            end += 1
+        js = js[:rm0] + js[end:]
+    return js
+
+
 def _strip_memorix_from_js_bundle(js: str) -> str:
-    """Remove Vue-router route objects for /memorix from minified bundles (no CSS hiding)."""
-    if "memorix" not in js.casefold():
+    """Remove Vue-router routes and labels for Memorix/Mémorix from minified bundles."""
+    if not _bundle_contains_memorix(js):
         return js
-    needles = ('path:"/memorix"', "path:'/memorix'")
+    needles = ('path:"/memorix"', "path:'/memorix'", 'path:"/mémorix"', "path:'/mémorix'")
     for needle in needles:
         for _ in range(80):
             if needle not in js:
@@ -342,9 +450,19 @@ def _strip_memorix_from_js_bundle(js: str) -> str:
             elif end < len(js) and js[end] == ",":
                 end += 1
             js = js[:rm0] + js[end:]
+    for needle in (
+        'name:"memorix"',
+        "name:'memorix'",
+        'name: "memorix"',
+        'name:"Memorix"',
+        'name:"Mémorix"',
+        "name:'Mémorix'",
+    ):
+        js = _strip_js_route_object_at_needle(js, needle)
     js = js.replace('"/memorix"', '"/dashboard"')
     js = js.replace("'/memorix'", "'/dashboard'")
     js = js.replace('path:"/memorix"', 'path:"/dashboard"')
+    js = js.replace('"/mémorix"', '"/dashboard"')
     return js
 
 
@@ -2999,7 +3117,7 @@ def serve(path):
                 _raw = file_path.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 _raw = ""
-            if "memorix" in _raw.casefold():
+            if _bundle_contains_memorix(_raw):
                 _raw = _strip_memorix_from_js_bundle(_raw)
                 from flask import Response
                 r = Response(_raw, mimetype="application/javascript")
